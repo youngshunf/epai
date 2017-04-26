@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+p{
+	color:#000;
+}
+.mui-table-view .mui-media-object {
+  line-height: 60px;
+  max-width: 60px !important;
+  height: 60px;
+}
+.control{
+	border-color: #007aff;
+	  border-radius: 5px;
+  border: 1px solid #007aff;
+}
+.control .item.active {
+  color: #fff;
+  background-color: #007aff;
+}
+.control .item:first-child {
+  border-left-width: 0;
+}
+.control .item {
+  line-height: 38px;
+  display: table-cell;
+  overflow: hidden;
+  width: 1%;
+  -webkit-transition: background-color .1s linear;
+  transition: background-color .1s linear;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #007aff;
+  border-color: #007aff;
+  border-left: 1px solid #007aff;
+}
+
+.mui-bar-popover {
+				width: 30%;
+}

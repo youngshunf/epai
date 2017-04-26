@@ -1,0 +1,17 @@
+@CHARSET "UTF-8";
+p{
+	color:#000;
+}
+.mui-table-view .mui-media-object {
+  line-height: 80px;
+  max-width: 80px;
+  height: 80px;
+}
+
+.mui-table-view:before {
+	background:none;
+}
+ul.mui-table-view  {
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+}

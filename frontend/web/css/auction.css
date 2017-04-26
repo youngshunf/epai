@@ -1,0 +1,65 @@
+ui,li{list-style:none;}
+i{font-style:normal}
+.auction{ 
+border:1px solid #dbd9d9;
+background: #fff;
+ box-shadow: 0 0 11px #C0C4CD;
+}
+.auction .pai-item{
+	margin:10px;
+	
+}
+.pai-item img{  margin:0 auto;
+			   width:100%;
+			   height:100%;}
+.pai-content h3{
+border-bottom:none;
+	margin-top: 10px;
+  padding-bottom: 0;
+color:#000;
+font-weight:bold;}
+
+.item-bid-box{
+display:block;
+position:absolute;
+right:26px;
+top:11px;
+background-color: #F74855;
+color:#fff;
+padding:10px;
+}
+
+.side-num{ font-weight:bold;}
+
+.pai-countdown{
+display:inline;
+}
+.pai-countdown i{
+color:#dd2323;
+font-size:17px;
+font-weight:600;
+font-family: Tahoma;}
+
+.pai-countdown .prev i{
+color:#08aeef;
+font-size:20px;
+font-weight:600;
+font-family: Tahoma;
+}
+	
+.item-button{display:inline-block; float:right;}
+
+.auction-cate{
+	border:1px solid #f7f7f7;
+}
+.auc-leading{
+	padding:5px;
+	border:2px solid red;
+	border-radius:5px;
+	color:red;
+}
+.auc-out{
+		padding:5px;
+	border:1px solid gray;
+	border-radius:3px
+}
