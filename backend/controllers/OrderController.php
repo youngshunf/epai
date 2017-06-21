@@ -125,7 +125,14 @@ class OrderController extends Controller
      */
     public function actionDelete($id)
     {
-       $model= $this->findModel($id);
+       $this->findModel($id)->delete();
+            yii::$app->getSession()->setFlash('success','订单已删除');
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function actionCancel($id)
+    {
+        $model= $this->findModel($id);
         $model->status=99;
         if($model->save()){
             yii::$app->getSession()->setFlash('success','订单已取消');

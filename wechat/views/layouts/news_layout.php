@@ -12,8 +12,6 @@ use common\models\CommonUtil;
   
     <div class="row">
               <div class="col-lg-9 col-md-9"> 
-                
-              
                      
                 <?= $content ?>
              
@@ -22,45 +20,23 @@ use common\models\CommonUtil;
 			<div class="col-lg-3  col-md-3">
 			<div class="panel-white">
         <?php 
-        $recomendNews=News::find()->andWhere(['is_recommend'=>1])->limit(10)->orderBy('created_at')->all();
-        $hotNews=News::find()->limit(10)->orderBy('count_view desc')->all();
+        $recomendNews=News::find()->andWhere(['cateid'=>'1'])->limit(8)->orderBy('created_at')->all();
         ?>
         
-        <h5>推荐资讯</h5>
+        <h5>推荐资讯 </h5>
         <?php 
         foreach ($recomendNews as $model){
         ?>
         
         <a href="<?= Url::to(['view','id'=>$model['newsid']])?>">
-    <div class=" wish-list">     
+    	<div class=" wish-list">     
         <div class="media-container">  
          <p ><?= $model->title?></p>    
         </div>    
         </div>       
-      
-  
-</a>
+		</a>
         <?php }?>
-        
-        
-    		</div>
-    		
-    		<div class="panel-white">
-    		<h5>一周热门</h5>
-    		      <?php 
-        foreach ($hotNews as $model){
-        ?>
-        
-        <a href="<?= Url::to(['view','id'=>$model['newsid']])?>">
-        <div class=" wish-list">     
-        <div class="media-container">  
-         <p ><?= $model->title?></p>    
-        </div>    
-        </div>       
-      
-  
-</a>
-        <?php }?>
+        <p class="center"><a href="<?= Url::to('/news/rec-more')?>">更多</a></p>
     		</div>
     		
             </div>

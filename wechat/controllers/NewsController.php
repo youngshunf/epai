@@ -37,17 +37,29 @@ class NewsController extends Controller
      */
     public function actionIndex()
     {
-      $model=News::find()->andWhere(['is_recommend'=>1,'cateid'=>1])->orderBy('created_at desc')->limit(8)->all();
         
+        $dataProvider = new ActiveDataProvider([
+            'query'=>News::find()->andWhere(['cateid'=>1,'is_recommend'=>'1'])->limit(3)->orderBy('created_at desc'),
+            'pagination'=>[
+                'pagesize'=>10
+            ]
+        ]);
+        $this->layout="@wechat/views/layouts/news_layout.php";
+        return $this->render('index', [
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+    
+    public function actionRecMore()
+    {
+    
         $dataProvider = new ActiveDataProvider([
             'query'=>News::find()->andWhere(['cateid'=>1])->orderBy('created_at desc'),
             'pagination'=>[
                 'pagesize'=>10
             ]
         ]);
-        $this->layout="@frontend/views/layouts/news_layout.php";
-        return $this->render('index', [
-             'model'=>$model,
+        return $this->render('rec-more', [
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -83,7 +95,6 @@ class NewsController extends Controller
         $model->save();       
         $title=$model->title;
         $relativeNews=News::find()->andWhere(['cateid'=>1])->limit(10)->orderBy('created_at desc ')->all();
-        $this->layout="@frontend/views/layouts/news_layout.php";
         return $this->render('view', [
             'model' => $model,
             'relativeNews'=>$relativeNews,      

@@ -37,7 +37,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
  
     <?php 
     $now=time();
-    if($model->status==1){?>
+    if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
     	 <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->end_time)?>" >
 				 &nbsp;<span class="countdown-text">距结束</span>&nbsp;&nbsp;
@@ -70,7 +70,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 				 </div>
 				 <div class="clear"></div>
                  </div>
-    <?php }elseif($model->status == 0){?>
+    <?php }elseif($now<$model->start_time){?>
     
      <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->start_time)?>" >
 				<?php if($model->status!=3){?>
@@ -107,9 +107,6 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  </div>
                 
                   <div class="center">
-                  <?php if($guarantee==0){?>
-					<a  class="btn btn-info guarantee-btn">提交保证金</a> 
-					<?php }?>
 					 &nbsp;
 					 <?php if(!empty($model->fixed_price)&&$model->status!=3){?>
 					 <?php if(!yii::$app->user->isGuest){?>
@@ -131,7 +128,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 				 </div>
 				 <div class="clear"></div>
                  </div>
-    <?php }else if($model->status >=2 ){?>
+    <?php }else if($now>$model->end_time){?>
                   <p>成交价格:<span class="red">￥<?= $model->current_price?></span></p>
                 <p class="red">已结束</p>
                    <div class="auction-info">

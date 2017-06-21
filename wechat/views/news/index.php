@@ -10,25 +10,22 @@ use yii\widgets\ListView;
 /* @var $searchModel common\models\SearchNews */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = '新闻资讯';
+$this->title = '我要学习';
 $this->registerJsFile('@web/nivo-slider/jquery.nivo.slider.pack.js');
 $this->registerCssFile('@web/nivo-slider/themes/default/default.css');
 $this->registerCssFile('@web/nivo-slider/nivo-slider.css');
 ?>
 <style>
 .media-object{
-	width:150px;
+	width:100px;
+	height:100px;
+	margin-left:5px;
+}
+a{
+	color:#333 !important;
 }
 
 </style>
-
-  <div class="slider-wrapper theme-default">
-       <div id="slider" class="nivoSlider">
-       <?php foreach ($model as $k=>$v){?>
-          <a href="<?= Url::to(['view','id'=>$v->newsid])?>"><img src="<?= yii::getAlias('@photo').'/'.$v->path.'mobile/'.$v->photo?> " data-thumb="<?= yii::getAlias('@photo').'/'.$v->path.'thumb/'.$v->photo?>" alt="<?= $v->title?>"  title="<?= $v->title?>" /></a>         
-         <?php }?>
-     </div>
-   </div>
 
     <?= ListView::widget([
             'dataProvider'=>$dataProvider,

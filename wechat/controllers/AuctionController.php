@@ -20,6 +20,8 @@ use common\models\AuctionCate;
 use common\models\AuctionRound;
 use common\models\Address;
 use common\models\Siteinfo;
+use common\models\WeChatTemplate;
+use common\models\GoodsLove;
 
 /**
  * AuctionController implements the CRUD actions for AuctionGoods model.
@@ -219,7 +221,7 @@ class AuctionController extends Controller
     public function actionRound(){
         $now=time();
         $dataProvider = new ActiveDataProvider([
-            'query'=>AuctionRound::find()->andWhere(" $now <= end_time and auth_status=1 ")->orderBy('sort desc,created_at asc'),
+            'query'=>AuctionRound::find()->andWhere(" offline=0 && post_type = 1 ")->orderBy('sort desc,start_time asc'),
             'pagination'=>[
                 'pagesize'=>20
             ]
@@ -247,17 +249,40 @@ class AuctionController extends Controller
     
     public function actionRoundView($id){
     $dataProvider = new ActiveDataProvider([
-        'query'=>AuctionGoods::find()->andWhere(['roundid'=>$id])->orderBy('sort desc,created_at asc'),
+        'query'=>AuctionGoods::find()->andWhere(['roundid'=>$id])->orderBy('sort desc,start_time asc'),
             'pagination'=>[
                 'pagesize'=>20
             ]
         ]);
-    $round=AuctionRound::findOne($id);
+     $round=AuctionRound::findOne($id);
             return $this->render('round-view', [
                 'dataProvider' => $dataProvider,
                 'round'=>$round
                 ]);
     
+    }
+    
+    public function actionGoodsLove($goodsid){
+        $user_guid=yii::$app->user->identity->user_guid;
+        $goodsLove=new GoodsLove();
+        $goodsLove->user_guid=$user_guid;
+        $goodsLove->goodsid=$goodsid;
+        $goodsLove->created_at=time();
+        if($goodsLove->save()){
+            yii::$app->getSession()->setFlash('success','收藏成功!');
+            return $this->redirect(yii::$app->request->referrer);
+        }
+        yii::$app->getSession()->setFlash('error','收藏失败!');
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function actionGoodsloveCancel($goodsid){
+        $user_guid=yii::$app->user->identity->user_guid;
+        $goodsLove=GoodsLove::findOne(['user_guid'=>$user_guid,'goodsid'=>$goodsid]);
+        if($goodsLove->delete()){
+            yii::$app->getSession()->setFlash('success','收藏已取消!');
+            return $this->redirect(yii::$app->request->referrer);
+        }
     }
     
   public function actionFixedBuy($goods_guid){
@@ -300,38 +325,35 @@ class AuctionController extends Controller
             yii::$app->getSession()->setFlash('error','对不起,您不是成交用户,不能进行购买!');
             return $this->redirect(yii::$app->request->referrer);
         }
-        
-        //获取用户默认收货地址
-        $address=Address::findOne(['user_guid'=>$user_guid,'is_default'=>1]);
-        if(empty($address)){
-            yii::$app->getSession()->setFlash('error','对不起,你没有设置默认收货地址!');
-            return $this->redirect(yii::$app->request->referrer);
-        }
-        //抵扣金额
-//         $deduction=0;
-//         if(yii::$app->user->identity->role_id==2){//高级用户拍卖保证金抵扣部分支付金额
-//             $guaranteeFee=GuaranteeFee::findOne(['user_guid'=>$user_guid,'goods_guid'=>$auctionGoods->goods_guid,'is_pay'=>1]);
-//             if(!empty($guaranteeFee)){
-//                 $deduction=$guaranteeFee->guarantee_fee;
-//             }
-//         }
-        
-        $order=new Order();
-        $order->user_guid=$user_guid;
-        $order->order_guid=CommonUtil::createUuid();
-        $order->orderno=Order::getOrderNO(Order::TYPE_AUCTION);
-        $order->type=Order::TYPE_AUCTION;
-        $order->goods_name=$auctionGoods->name;
-        $order->total_amount=$auctionGoods->deal_price;
-        $order->amount=$auctionGoods->deal_price;
-        $order->address_id=$address->id;
-        $order->address=$address['province'].' '.$address['city'].' '.$address['district'].' '.$address['address'].' '.$address['company'].' '.$address['name'].' '.$address['phone'];
-        $order->number=1;
-        $order->biz_guid=$auctionGoods->goods_guid;
-        $order->created_at=time();
-        if($order->save()){
+        $order=Order::find()->andWhere(['user_guid'=>$user_guid,'biz_guid'=>$auctionGoods->goods_guid])->one();
+        if(!empty($order)){
             return $this->redirect(['site/pay-order','order_guid'=>$order->order_guid]);
+        }else{
+            $order=new Order();
+            $order->merchant_user=$auctionGoods->user_guid;
+            $order->order_type=$auctionGoods->post_type;
+            $order->user_guid=$user_guid;
+            $order->order_guid=CommonUtil::createUuid();
+            $order->orderno=Order::getOrderNO(Order::TYPE_AUCTION);
+            $order->type=Order::TYPE_AUCTION;
+            $order->goods_name=$auctionGoods->name;
+            $order->total_amount=$auctionGoods->deal_price;
+            $order->amount=$auctionGoods->deal_price;
+            $address=Address::findOne(['user_guid'=>$user_guid,'is_default'=>1]);
+            if(!empty($address)){
+            $order->address_id=$address->id;
+            $order->address=$address['province'].' '.$address['city'].' '.$address['district'].' '.$address['address'].' '.$address['company'].' '.$address['name'].' '.$address['phone'];
+            }
+            $order->number=1;
+            $order->biz_guid=$auctionGoods->goods_guid;
+            $order->created_at=time();
+            if($order->save()){
+                return $this->redirect(['site/pay-order','order_guid'=>$order->order_guid]);
+            }
         }
+        
+         yii::$app->getSession()->setFlash('error','对不起,订单不存在!');
+            return $this->redirect(yii::$app->request->referrer);
         
     }
     
@@ -359,6 +381,47 @@ class AuctionController extends Controller
         return $this->redirect(yii::$app->request->referrer);
     }
     
+    public function actionNewOrderAddress(){
+        $user_guid=yii::$app->user->identity->user_guid;
+        Address::updateAll(['is_default'=>0],['user_guid'=>$user_guid]);
+        $orderid=$_POST['orderid'];
+        $order=Order::findOne($orderid);
+        if(empty($order)){
+            yii::$app->getSession()->setFlash('success','订单为找到!');
+            return $this->redirect(yii::$app->request->referrer);
+        }
+        $address=new Address();
+        $address->user_guid=$user_guid;
+        $address->province=$_POST['province'];
+        $address->city=$_POST['city'];
+        $address->district=$_POST['district'];
+        $address->address=$_POST['address'];
+        $address->name=$_POST['name'];
+        $address->phone=$_POST['mobile'];
+        $address->company=@$_POST['company'];
+        $address->is_default=1;
+        $address->created_at=time();
+        if($address->save()){
+            $order->address_id=$address->id;
+            $order->address=$address['province'].' '.$address['city'].' '.$address['district'].' '.$address['address'].' '.$address['company'].' '.$address['name'].' '.$address['phone'];
+            $order->save();
+            $allOrder=Order::find()->andWhere(['user_guid'=>$user_guid,'address_id'=>'0'])->all();
+            foreach ($allOrder as $v){
+                if(empty($v->address)){
+                    $v->address_id=$address->id;
+                    $v->address=$address['province'].' '.$address['city'].' '.$address['district'].' '.$address['address'].' '.$address['company'].' '.$address['name'].' '.$address['phone'];
+                    $v->save();
+                }
+            }
+            yii::$app->getSession()->setFlash('success','收货地址增加成功!');
+            return $this->redirect(['site/pay-order','order_guid'=>$order->order_guid]);
+        }else{
+            yii::$app->getSession()->setFlash('success','收货地址增加失败!');
+        }
+    
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
     /**
      * Displays a single AuctionGoods model.
      * @param integer $id
@@ -370,20 +433,21 @@ class AuctionController extends Controller
         $model=$this->findModel($id);
         $model->count_view+=1;
         $model->save();
-  
+        $user_guid=yii::$app->user->identity->user_guid;
+        CommonUtil::checkAllAuction();
         //判断用户是否交保证金
-       $guarantee=0;
-        if(!yii::$app->user->isGuest){
-           if( yii::$app->user->identity->role_id==3){
-               $guarantee=yii::$app->user->identity->guarantee;
-           }elseif( yii::$app->user->identity->role_id==2){
-               $user_guid=yii::$app->user->identity->user_guid;
-               $guaranteeFee=GuaranteeFee::findOne(['user_guid'=>$user_guid,'goods_guid'=>$model->goods_guid,'is_pay'=>1]);
-               if(!empty($guaranteeFee)){
-                   $guarantee=1;
-               }
-           }
-        }
+        $guarantee=0;
+//         if(!yii::$app->user->isGuest){
+//            if( yii::$app->user->identity->role_id==3){
+//                $guarantee=yii::$app->user->identity->guarantee;
+//            }elseif( yii::$app->user->identity->role_id==2){
+//                $user_guid=yii::$app->user->identity->user_guid;
+//                $guaranteeFee=GuaranteeFee::findOne(['user_guid'=>$user_guid,'goods_guid'=>$model->goods_guid,'is_pay'=>1]);
+//                if(!empty($guaranteeFee)){
+//                    $guarantee=1;
+//                }
+//            }
+//         }
         
     $bidRecData=new ActiveDataProvider([
             'query'=>AuctionBidRec::find()->andWhere(['goods_guid'=>$model->goods_guid])->orderBy("price desc,created_at desc"),
@@ -391,15 +455,37 @@ class AuctionController extends Controller
                 'pagesize'=>5
             ]
         ]);
+    $delta_price=20;
+    if($model->current_price>=200&&$model->current_price<500){
+        $delta_price=50;
+    }elseif($model->current_price>=500&&$model->current_price<2000){
+        $delta_price=100;
+    }elseif($model->current_price>2000&&$model->current_price<5000){
+        $delta_price=200;
+    }elseif($model->current_price>=5000){
+        $delta_price=500;
+    }
+    
     $auctionRule=Siteinfo::findOne(['id'=>4]);
     $auctionTimes=AuctionBidRec::find()->andWhere(['goods_guid'=>$model->goods_guid])->count();
+    $hasLove=false;
+    $goodsLove=GoodsLove::findOne(['user_guid'=>$user_guid,'goodsid'=>$id]);
+    if(!empty($goodsLove)){
+        $hasLove=true;
+    }
+    $picUrl=yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo;
+    $description=CommonUtil::cutHtml($model->desc);
         return $this->render('view', [
             'model' =>$model ,
             'cateid'=>$model->cateid,
             'guarantee'=>$guarantee,
             'bidRecData'=>$bidRecData,
             'auctionTimes'=>$auctionTimes,
-            'auctionRule'=>$auctionRule
+            'auctionRule'=>$auctionRule,
+            'delta_price'=>$delta_price,
+            'hasLove'=>$hasLove,
+            'picUrl'=>$picUrl,
+            'description'=>$description
         ]);
     }
     
@@ -451,6 +537,10 @@ class AuctionController extends Controller
         $auctionGoods=AuctionGoods::findOne(['goods_guid'=>$goods_guid]);
         $auctionTimes=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->count();
         $now=time();
+        if($auctionGoods->leading_user==$user_guid){
+            yii::$app->getSession()->setFlash('error',"您已经是最高价了,不能再加价");
+            return $this->redirect(['view','id'=>$auctionGoods->id]);
+        }
         if($now>$auctionGoods->end_time){
             yii::$app->getSession()->setFlash('error',"出价失败,拍卖已结束,下次早点来哦.");
             return $this->redirect(['view','id'=>$auctionGoods->id]);
@@ -466,7 +556,17 @@ class AuctionController extends Controller
                 return $this->redirect(['view','id'=>$auctionGoods->id]);
             }
         }
-        if(($price-$auctionGoods->current_price)%$auctionGoods->delta_price!=0){
+        $delta_price=20;
+        if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+            $delta_price=50;
+        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+            $delta_price=100;
+        }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
+            $delta_price=200;
+        }elseif ($auctionGoods->current_price>=5000){
+            $delta_price=500;
+        }
+        if(($price-$auctionGoods->current_price)%$delta_price!=0){
             yii::$app->getSession()->setFlash('error',"出价失败,竞拍价格必须为加价幅度的整数倍.");
             return $this->redirect(['view','id'=>$auctionGoods->id]);
         }
@@ -487,12 +587,24 @@ class AuctionController extends Controller
         //更新拍品表
         $auctionGoods->count_auction+=1;       
         $auctionGoods->current_price=$price;
+        $leading_user=$auctionGoods->leading_user;
         $auctionGoods->leading_user=$user_guid;
+        if($auctionGoods->end_time - time() <=60){
+            $auctionGoods->end_time +=60;
+            $round=AuctionRound::findOne($auctionGoods->roundid);
+            if(!empty($round)){
+                if($round->end_time<$auctionGoods->end_time){
+                    $round->end_time=$auctionGoods->end_time;
+                    $round->status=1;
+                    $round->save();
+                }
+            }
+        }
         $auctionGoods->updated_at=time();
         if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error"); 
         
         $transaction->commit();
-        
+        $this->SendTemplateMessage($leading_user, $auctionGoods->id);
         }catch (Exception $e){
             $transaction->rollBack();
             yii::$app->getSession()->setFlash('error',"出价失败,请稍候重试!");
@@ -509,7 +621,7 @@ class AuctionController extends Controller
             yii::$app->getSession()->setFlash('success','您的出价已被超越!');
         }
            
-        return $this->redirect(['view','id'=>$auctionGoods->id]);
+        return $this->redirect(yii::$app->request->referrer);
                         
     }
     
@@ -536,11 +648,22 @@ class AuctionController extends Controller
             return false;
         }
         
+        $delta_price=20;
+        if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+            $delta_price=50;
+        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+            $delta_price=100;
+        }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
+            $delta_price=200;
+        }elseif ($auctionGoods->current_price>=5000){
+            $delta_price=500;
+        }
+        
         $secondMaxAgentPrice=AuctionAgentBid::find()->andWhere(" goods_guid='$goods_guid' and is_valid=1 and top_price!=$maxAgentPrice ")->max('top_price');
         if (empty($secondMaxAgentPrice)){
-            $bidPrice=$auctionGoods->current_price+$auctionGoods->delta_price;
+            $bidPrice=intval($auctionGoods->current_price)+intval($delta_price) ;
         }else{
-            $bidPrice=$secondMaxAgentPrice+$auctionGoods->delta_price;
+            $bidPrice=intval($secondMaxAgentPrice) + intval($delta_price);
         }
         
         $agentBid=AuctionAgentBid::find()->andWhere(" goods_guid ='$goods_guid' and is_valid=1 and top_price=$maxAgentPrice")->orderBy("created_at desc")->all();
@@ -566,21 +689,26 @@ class AuctionController extends Controller
                 //更新拍品表
                 $auctionGoods->count_auction+=1;
                 $auctionGoods->current_price=$bidRec->price;
+                $leading_user=$auctionGoods->leading_user;
                 $auctionGoods->leading_user=$bidRec->user_guid;
                 $auctionGoods->updated_at=time();
+                if($auctionGoods->end_time - time() <=60){
+                    $auctionGoods->end_time +=60;
+                }
                 if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error");                 
                 $transaction->commit();
+                $this->SendTemplateMessage($leading_user, $auctionGoods->id);
             }catch (Exception $e){
                 $transaction->rollBack();
+                new \Exception('出价失败');
                 return false;
             }
         }else{
             //有多个最高代理价相同时,竞拍价格为最高代理价,按照后代理先出价的顺序进行出价
             $transaction=yii::$app->db->beginTransaction();
             try{
-              
                 foreach ($agentBid as $k=> $v){
-                 AuctionBidRec::updateAll(['is_leading'=>0],['goods_guid'=>$goods_guid]);
+                AuctionBidRec::updateAll(['is_leading'=>0],['goods_guid'=>$goods_guid]);
                 $bidRec=new AuctionBidRec();
                 $bidRec->goods_guid=$goods_guid;
                 $bidRec->user_guid=$v->user_guid;
@@ -590,6 +718,7 @@ class AuctionController extends Controller
                 $bidRec->created_at=time()+($k*35);
                 if(!$bidRec->save()) throw new Exception(" insert db auction_bid_rec error");            
                 //更新拍品表
+                $leading_user=$auctionGoods->leading_user;
                 $auctionGoods->count_auction+=1;
                 $auctionGoods->current_price=$bidRec->price;
                 $auctionGoods->leading_user=$bidRec->user_guid;
@@ -597,11 +726,13 @@ class AuctionController extends Controller
                 if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error");
                 }
                 $transaction->commit();
+                $this->SendTemplateMessage($leading_user, $auctionGoods->id);
             }catch (Exception $e){
+                
                 $transaction->rollBack();
+                new \Exception('出价失败');
                 return false;
             }
-       
         }
 
         $this->AutoBid($goods_guid);
@@ -610,12 +741,12 @@ class AuctionController extends Controller
         
     }
     
+    
     public function actionSubmitAgent(){
         $goods_guid=$_POST['goods-guid'];
         $user_guid=yii::$app->user->identity->user_guid;
         $top_price=$_POST['agent-price'];
         $auctionGoods=AuctionGoods::findOne(['goods_guid'=>$goods_guid]);
-        
         $auctionAgentBid=new AuctionAgentBid();
         $auctionAgentBid->user_guid=$user_guid;
         $auctionAgentBid->top_price=$top_price;
@@ -623,7 +754,8 @@ class AuctionController extends Controller
         $auctionAgentBid->created_at=time();
         if(!$auctionAgentBid->save()){
             yii::$app->getSession()->setFlash('error',"代理出价失败,请稍候重试!");
-            return $this->redirect(['view','id'=>$auctionGoods->id]);
+            return $this->redirect(yii::$app->request->referrer);
+//             return $this->redirect(['view','id'=>$auctionGoods->id]);
         }
         
         yii::$app->getSession()->setFlash('success',"代理出价成功!");
@@ -631,17 +763,17 @@ class AuctionController extends Controller
         if($user_guid==$auctionGoods->leading_user){
             
             if($this->AutoBid($goods_guid)){
-                yii::$app->getSession()->setFlash('success','您的出价已被超越!');
+                yii::$app->getSession()->setFlash('success','代理出价成功!');
             }
-        
-            return $this->redirect(['view','id'=>$auctionGoods->id]);
+            return $this->redirect(yii::$app->request->referrer);
+//             return $this->redirect(['view','id'=>$auctionGoods->id]);
         }
         
         if($this->AgentBid($goods_guid)){
-            yii::$app->getSession()->setFlash('success','您的出价已被超越!');
+            yii::$app->getSession()->setFlash('success','代理出价成功!');
         }
-
-        return $this->redirect(['view','id'=>$auctionGoods->id]);
+        return $this->redirect(yii::$app->request->referrer);
+//         return $this->redirect(['view','id'=>$auctionGoods->id]);
     }
     
 
@@ -701,11 +833,22 @@ class AuctionController extends Controller
             }
     
                 AuctionBidRec::updateAll(['is_leading'=>0],['goods_guid'=>$goods_guid]);
+                
+                $delta_price=20;
+                if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+                    $delta_price=50;
+                }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+                    $delta_price=100;
+                }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
+                    $delta_price=200;
+                }elseif ($auctionGoods->current_price>=5000){
+                    $delta_price=500;
+                }
                 //增加出价记录
                 $bidRec=new AuctionBidRec();
                 $bidRec->goods_guid=$goods_guid;
                 $bidRec->user_guid=$virtualUser->user_guid;
-               $bidRec->price=intval($auctionGoods->current_price)+intval($auctionGoods->delta_price);
+                $bidRec->price=intval($auctionGoods->current_price)+intval($delta_price);
                 $bidRec->is_leading=1;
                 $bidRec->created_at=time()+1;
                 if(!$bidRec->save()) throw new Exception(" insert db auction_bid_rec error");
@@ -713,15 +856,21 @@ class AuctionController extends Controller
                 //更新拍品表
                 $auctionGoods->count_auction+=1;
                 $auctionGoods->current_price=$bidRec->price;
+                $leading_user=$auctionGoods->leading_user;
                 $auctionGoods->leading_user=$virtualUser->user_guid;
                 $auctionGoods->updated_at=time();
+                if($auctionGoods->end_time - time() <=60){
+                    $auctionGoods->end_time +=60;
+                }
                 if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error");
     
                 $transaction->commit();
-                yii::$app->getSession()->setFlash('success','您的出价已被超越!');
+                $this->SendTemplateMessage($leading_user, $auctionGoods->id);
+                yii::$app->getSession()->setFlash('success','代理出价成功!');
                 return  true;
     
             }catch (Exception $e){
+                yii::$app->getSession()->setFlash('success','代理出价失败!');
                 $transaction->rollBack();
                 return false;
             }
@@ -737,5 +886,53 @@ class AuctionController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public  function SendTemplateMessage($user_guid,$goodsid){
+       
+        if(empty($user_guid)){
+            return false;
+        }
+        $sendModel=new WeChatTemplate(yii::$app->params['appid'], yii::$app->params['appsecret']);
+        $user=User::findOne(['user_guid'=>$user_guid]);
+        $goods=AuctionGoods::findOne($goodsid);
+        if($user->role_id==0){
+            return false;
+        }
+        $data=[];
+        $data['first']=[
+            "value"=>'您参与的拍卖已经被超越,请及时出价!',
+            "color"=>"#173177"
+        ];
+        $data['keyword1']=[
+            "value"=>$goods->name,
+            "color"=>"#173177"
+        ];
+        $data['keyword2']=[
+            "value"=>$goods->current_price,
+            "color"=>"#173177"
+        ];
+        $data['keyword3']=[
+            "value"=>$goods->count_auction,
+            "color"=>"#173177"
+        ];
+        $data['keyword5']=[
+            "value"=>CommonUtil::fomatTime($goods->end_time),
+            "color"=>"#173177"
+        ];
+        $result=false;
+            $finalData=[
+                "touser"=>$user->openid,
+                "template_id"=>'RJL21kj3WHFNaj4bWaPjNupB3m0wAEdhcQITKiz9A2Y',
+                "url"=>'http://wechat.1paibao.net/auction/view?id='.$goodsid,
+                "topcolor"=>"#FF0000",
+                "data"=>$data
+            ];
+            $res=$sendModel->send_template_message($finalData);
+             
+            if($res['errmsg']=='ok'){
+                $result=true;
+            }
+        return $result;
     }
 }

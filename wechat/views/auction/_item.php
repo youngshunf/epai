@@ -16,7 +16,7 @@ use yii\helpers\Url;
 				</a>	
 				<?php 
 				$now=time();
-				if($model->status==1){
+				if($now>=$model->start_time&&$now<=$model->end_time){
 				?>			
 				<div class="pai-content">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
@@ -37,7 +37,7 @@ use yii\helpers\Url;
 				<div class="item-bid-box">
                     <span class="side-num"><?= $model->count_auction?></span>次出价
 				</div>
-			<?php }elseif ($model->status==0){?>
+			<?php }elseif ($now<$model->start_time){?>
 			     	<div class="pai-content">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right">加价幅度:<i class="red">￥<?= $model->delta_price?></i></span></p>				 
@@ -53,7 +53,7 @@ use yii\helpers\Url;
 				 <div class="clear"></div>
                  </div>								 
 				</div>			
-			<?php }elseif ($model->status>=2){?>
+			<?php }elseif ($now>$model->end_time){?>
 				<div class="pai-content">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right"> 当前价格:<i class="red">￥<?= $model->current_price?></i></span></p>				 

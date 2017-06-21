@@ -3,11 +3,13 @@ use wechat\assets\AppAsset;
 use yii\helpers\Html;
 use frontend\widgets\Alert;
 use yii\helpers\Url;
+use common\models\JSSDK;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
 
 AppAsset::register($this);
+$description = empty($description)?yii::$app->params['site-desc']:$description;
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -30,6 +32,7 @@ AppAsset::register($this);
          <meta name="description" content="<?= yii::$app->params['site-desc'] ?>" />
        <?php }?>
 	 <?php $this->head() ?>
+	 <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 </head>
 <body>
     <?php $this->beginBody() ?>
@@ -42,54 +45,64 @@ AppAsset::register($this);
         <?= $content ?>
         
         	<nav class="mui-bar mui-bar-tab ">
-			<a class="mui-tab-item" href="#Popover_0">易拍拍卖</a>
-			<a class="mui-tab-item" href="#Popover_1">文玩天下</a>
-			<a class="mui-tab-item" href="#Popover_2">E拍宝</a>
+			<a class="mui-tab-item" href="#Popover_0">我要拍</a>
+			<a class="mui-tab-item" href="#Popover_1">我要学习</a>
+			<a class="mui-tab-item" href="#Popover_2">联系我们</a>
 		</nav>
 		<div id="Popover_0" class="mui-popover mui-bar-popover">
 			<div class="mui-popover-arrow"></div>
 			<ul class="mui-table-view">
-			<li class="mui-table-view-cell"><a href="<?= Url::to(['lottery/index'])?>">一元夺宝</a>
+			    
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['auction/round'])?>">进入拍场</a>
 				</li>
-				<li class="mui-table-view-cell"><a href="<?= Url::to(['auction/round'])?>">专场拍卖</a>
+				<li class="mui-table-view-cell"><a href="https://weidian.com/?userid=257822600">进入微店</a>
 				</li>
-				<!--  <li class="mui-table-view-cell"><a href="<?= Url::to(['auction/personal-round'])?>">个人专场</a>
-				</li>-->
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['user/index'])?>">个人中心</a>
+				</li>
+				<!--  <li class="mui-table-view-cell"><a href="<?= Url::to(['auction/personal-round'])?>">进入拍场</a>
+				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['auction/index'])?>">天天易拍</a>
 				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['auction/index','status'=>1])?>">拍品预展</a>
 				</li>
-				
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['lottery/index'])?>">一元夺宝</a>
+				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['auction/cate'])?>">拍品分类</a>
 				</li>
+				-->
 				
 			</ul>
 		</div>
 		<div id="Popover_1" class="mui-popover mui-bar-popover">
 			<div class="mui-popover-arrow"></div>
 			<ul class="mui-table-view">
-				<li class="mui-table-view-cell"><a href="<?= Url::to(['news/index'])?>">今日潘家园</a>
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['news/index'])?>">我要学习</a>
 				</li>
+				<li class="mui-table-view-cell"><a href="https://mp.weixin.qq.com/s?__biz=MzIxOTE0ODQ3Mg==&mid=2651610666&idx=1&sn=2b4aee9bb12c1895d0bb6f888ae090b9&chksm=8c2747fdbb50ceeb47602fb09b00591719cb1b6e38a695f25b90688727e76b1764361a401317&mpshare=1&scene=1&srcid=0614SBggCyU7JpUgeVekHj0Q&key=ba1edc5f4b6bb31c7642c30e48eb75d7b15f44e45b813bedc2e41605904cb9f65060dc05f0d7f3e5a0947cae609998cec5b25b8c71d80abbf7727b522ba1635a517b03b2cee1c4b1ba1a90ce716253a3&ascene=0&uin=MjQwMDQwMjU4MA%3D%3D&devicetype=iMac+MacBookPro12%2C1+OSX+OSX+10.12.5+build(16F73)&version=12020710&nettype=WIFI&fontScale=100&pass_ticket=UnTCy2VYtm%2Ff6CMNhTs1mP%2BWdb4ltXAXTKDT5ZKd3lG7K7IXk3EMW9ysFI3tcBjY">
+				手秀大赛</a>
+				</li>
+				<!--  
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['treasure/index'])?>">易宝天下</a>
 				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['knowledge/index'])?>">知文玩</a>
 				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['mall/index'])?>">E拍商城</a>
 				</li>
+				-->
 			</ul>
 		</div>
 		<div id="Popover_2" class="mui-popover mui-bar-popover">
 			<div class="mui-popover-arrow"></div>
 			<ul class="mui-table-view">
-				<li class="mui-table-view-cell"><a href="<?= Url::to(['user/index'])?>">个人中心</a>
-				</li>
+				<!--  
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['merchant/index'])?>">卖家中心</a>
 				</li>
-				<li class="mui-table-view-cell"><a href="<?= Url::to(['site/contact'])?>">联系我们</a>
-				</li>
-				<li class="mui-table-view-cell"><a href="<?= Url::to(['site/mortage'])?>">网上典当</a>
+				-->
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['site/mortage'])?>">拍卖合同</a>
 				</li>
 				<li class="mui-table-view-cell"><a href="<?= Url::to(['site/collect'])?>">拍品征集</a>
+				</li>
+				<li class="mui-table-view-cell"><a href="<?= Url::to(['site/contact'])?>">联系客服</a>
 				</li>
 			</ul>
 		</div>
@@ -131,10 +144,34 @@ AppAsset::register($this);
 		</div><!-- /.modal -->
     <footer class="footer">
         <div class="container">    
-        <p >Copyright  &copy;  <?= date('Y')?> 北京易拍宝网络科技有限公司   </p>
+        <p >Copyright  &copy;  <?= date('Y')?> 小火文玩拍卖   </p>
         </div>
     </footer>
+<script type="text/javascript">
+<?php 
+$jssdk=new JSSDK(yii::$app->params['appid'], yii::$app->params['appsecret']);
+$signPackage = $jssdk->GetSignPackage();
+// $picUrl=empty($picUrl)?yii::$app->params['picUrl']:$picUrl;
+?>
 
+wx.config({  
+    debug: false,  
+    appId: '<?= $signPackage["appId"]?>',  
+    timestamp: '<?= $signPackage["timestamp"]?>',  
+    nonceStr: '<?=$signPackage["nonceStr"]?>',  
+    signature: '<?= $signPackage["signature"]?>',  
+    jsApiList: [  
+      // 所有要调用的 API 都要加到这个列表中  
+        'checkJsApi',  
+        'onMenuShareTimeline',  
+        'onMenuShareAppMessage',  
+        'onMenuShareQQ',  
+        'onMenuShareWeibo',  
+        'onMenuShareQZone'  
+    ]  
+  }); 
+
+</script>
     <?php $this->endBody() ?>
 </body>
 </html>

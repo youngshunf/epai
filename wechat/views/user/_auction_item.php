@@ -9,9 +9,8 @@ use common\models\LotteryRec;
 <?php if(!empty($model->auctionGoods)){?>
    <ul class="mui-table-view">
 				<li class="mui-table-view-cell mui-media">				
-					
+					<a href="<?= Url::to(['auction/view','id'=>$model->auctionGoods->id])?>">
 						<img class="mui-media-object mui-pull-left"  src="<?= yii::getAlias('@photo').'/'.$model->auctionGoods->path.'thumb/'.$model->auctionGoods->photo?>" >
-						
 						<div class="mui-media-body">
 						<p><?= $model->auctionGoods->name?></p>
 							<p>
@@ -29,7 +28,7 @@ use common\models\LotteryRec;
 							<span class="pull-right grey"><?= CommonUtil::fomatTime($model->created_at)?></span>
 							</p>
 						</div>
-				
+						</a>
 				</li>
     </ul>
   <?php }?>

@@ -73,7 +73,7 @@ class AuctionController extends Controller
     public function actionRound()
     {
         $dataProvider = new ActiveDataProvider([
-            'query'=>AuctionRound::find()->andWhere(['post_type'=>1])->orderBy('sort desc,created_at asc'),
+            'query'=>AuctionRound::find()->andWhere(['post_type'=>1])->orderBy('sort desc,created_at desc'),
             'pagination'=>[
                 'pagesize'=>10
             ]
@@ -84,6 +84,18 @@ class AuctionController extends Controller
         ]);
     }
     
+    public function actionOffline($id){
+        $round=AuctionRound::findOne($id);
+        if($round->offline==1){
+            $round->offline=0;
+        }elseif($round->offline==0){
+            $round->offline=1;
+        }
+        if($round->save()){
+            yii::$app->getSession()->setFlash('success','操作成功!');
+        }
+        return $this->redirect(yii::$app->request->referrer);
+    }
     public function actionGoods()
     {
         $searchModel = new SearchAuctionGoods();
@@ -201,6 +213,12 @@ class AuctionController extends Controller
             }
             $model->start_time=strtotime($model->start_time);
             $model->end_time=strtotime($model->end_time);
+            $time=time();
+            if($time>$model->start_time&&$time<$model->end_time){
+                $model->status=1;
+            }elseif($time>$model->end_time){
+                $model->status=2;
+            }
             $model->created_at=time();
             if($model->save())
                 return $this->redirect(['view-round', 'id' => $model->id]);
@@ -214,8 +232,8 @@ class AuctionController extends Controller
     public function actionUpdateRound($id)
     {
         $model = AuctionRound::findOne($id);
-        $model->start_time=date('Y-m-d H:1',$model->start_time);
-        $model->end_time=date('Y-m-d H:1',$model->end_time);
+        $model->start_time=date('Y-m-d H:i',$model->start_time);
+        $model->end_time=date('Y-m-d H:i',$model->end_time);
         if ($model->load(Yii::$app->request->post()) ) {
             $photo=ImageUploader::uploadByName('photo');
             if($photo){
@@ -224,6 +242,14 @@ class AuctionController extends Controller
             }
             $model->start_time=strtotime($model->start_time);
             $model->end_time=strtotime($model->end_time);
+            $time=time();
+            if($time>$model->start_time&&$time<$model->end_time){
+                $model->status=1;
+            }elseif($time>$model->end_time){
+                $model->status=2;
+            }elseif ($time<$model->start_time){
+                $model->status=0;
+            }
             $model->created_at=time();
             if($model->save())
                 return $this->redirect(['view-round', 'id' => $model->id]);

@@ -11,7 +11,7 @@ use common\models\MallGoods;
 ?>
 
    <ul class="mui-table-view">
-               
+               <a href="<?= Url::to(['site/pay-order','order_guid'=>$model->order_guid])?>" style="color:#333">
 				<?php if($model->type==Order::TYPE_GUARANTEE){?>
     				 <li class="mui-table-view-cell mui-media">	
                     <p><span class="mui-badge mui-badge-primary">保证金订单</span><span class="pull-right red-sm"><?= CommonUtil::getDescByValue('order', 'status', $model->status)?></span></p>
@@ -56,9 +56,13 @@ use common\models\MallGoods;
 					<div class="mui-media-body">
 				       	<p class="bold"><?= $goods->name?></p>
                         <p><span >￥<?= $model->amount?></span></p>
-                        <p><span >订单编号<?= $model->orderno?></span>
-                     </p>
-                                 
+                        <p><span >订单编号 ： <?= $model->orderno?></span></p>
+                        <?php if($model->status>1 && $model->status <=3){?>
+                        <p><span >快递公司 ： <?= $model->express_company?></span></p>
+                         <p><span >快递单号 ： <?= $model->express_number?></span>
+                         <a class="btn btn-info"  href="http://www.kuaidi100.com/chaxun?com=<?= $model->express_company?>&nu=<?= $model->express_number?>"  target="_blank">查询</a>
+                         </p>        
+                         <?php }?>
 						</div>
 						</li>
 						<li class="mui-table-view-cell mui-media">
@@ -97,6 +101,6 @@ use common\models\MallGoods;
 					<?php }?>
 					<?php }?>
 					<?php }?>
-				
+				</a>
     </ul>
   

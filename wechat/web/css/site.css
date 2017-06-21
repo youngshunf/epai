@@ -4,9 +4,12 @@ body {
 	height: 100%;	
 	font-family: "微软雅黑" !important;
 	background:#f7f7f7;
-	font-size:15px !important;
-	
+	font-size:13px !important;
     color: #333;
+}
+.mui-h4, h4 {
+    font-size: 14px !important;
+	margin-bottom:5px !important;
 }
 .modal-header {
 	padding:8px;
@@ -29,8 +32,12 @@ img{
 	max-width:100% !important;
 	height:auto;
 }
-p{
-	color:#000000 !important ;
+
+p {
+    font-size: 13px !important;
+    margin-top: 0;
+    margin-bottom: 5px !important;
+    color: #333 !important;
 }
 .navbar{
 	margin:0;
@@ -284,7 +291,7 @@ table{
 a,a:link,a:hover,a:active{
 text-decoration:none;
 }
-.indent{text-indent: 2em;}   
+.indent{text-indent: 1em;}   
 .content-padded{
 	padding:10px;
 }

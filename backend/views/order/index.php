@@ -44,7 +44,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>function ($model){
               return CommonUtil::getDescByValue('order', 'status', $model->status); 
            }],
-            ['class' => 'yii\grid\ActionColumn'],
+            [	'class' => 'yii\grid\ActionColumn',
+             	'header'=>'操作',
+             	'options'=>['width'=>'200px'],
+            	'template'=>'{view}{delete}{cancel}',
+	             'buttons'=>[
+					'view'=>function ($url,$model,$key){
+	                     return  Html::a('查看 | ', $url, ['title' => '查看详细'] );
+					},
+					'delete'=>function ($url,$model,$key){
+					return  Html::a('删除 |', $url, ['title' => '删除订单', 'data' => [
+                                        'confirm' => '您确定要删除此订单吗?',
+                                        'method' => 'post',
+                                    ],] );
+					},
+					'cancel'=>function ($url,$model,$key){
+					return  Html::a('取消', $url, ['title' => '取消订单', 'data' => [
+					    'confirm' => '您确定要取消此订单吗?',
+					    'method' => 'post',
+					],] );
+					},
+				]
+           	],
         ],
     ]); ?>
 

@@ -21,6 +21,8 @@ use common\models\Message;
 use common\models\VipRefund;
 use common\models\GuaranteeFee;
 use common\models\Coupon;
+use common\models\Address;
+use common\models\GoodsLove;
 
 /**
  * WishController implements the CRUD actions for Wish model.
@@ -70,9 +72,11 @@ class UserController extends Controller
         $user_guid=yii::$app->user->identity->user_guid;
         $model=User::findOne(['user_guid'=>$user_guid]);
         $unread=Message::find()->andWhere(['to_user'=>$user_guid,'is_read'=>0,'type'=>Message::SYS])->count();
+        $unPayOrder=Order::find()->andWhere(['user_guid'=>$user_guid,'status'=>0])->count();
       return $this->render('index',[
           'model'=>$model,        
-          'unread'=>$unread
+          'unread'=>$unread,
+          'unPayOrder'=>$unPayOrder
       ]);
     }
 
@@ -170,6 +174,17 @@ class UserController extends Controller
         return $this->render('my-auction',['auctionData'=>$auctionData]);       
     }
     
+    public function actionMyLove(){
+        $user_guid=yii::$app->user->identity->user_guid;
+        $goods=new ActiveDataProvider([
+            'query'=>GoodsLove::find()->andWhere(['user_guid'=>$user_guid])->orderBy("created_at desc"),
+            'pagination'=>[
+                'pagesize'=>20
+            ]
+        ]);
+        return $this->render('my-love',['goods'=>$goods]);
+    }
+    
     
     public function actionMyCoupon(){
     
@@ -263,6 +278,48 @@ class UserController extends Controller
         return $this->render('profile',['model'=>$model]);
     }
     
+    public function  actionMyAddress(){
+        $user_guid=yii::$app->user->identity->user_guid;
+        $dataProvider=new ActiveDataProvider([
+            'query'=>Address::find()->andWhere(['user_guid'=>$user_guid])->orderBy("created_at desc"),
+            'pagination'=>[
+                'pagesize'=>10
+            ]
+        ]);
+        return $this->render('my-address',['dataProvider'=>$dataProvider]);
+    }
+    
+    //增加收货地址
+    public function actionNewAddress(){
+        $user_guid=yii::$app->user->identity->user_guid;
+        Address::updateAll(['is_default'=>0],['user_guid'=>$user_guid]);
+        $address=new Address();
+        $address->user_guid=$user_guid;
+        $address->province=$_POST['province'];
+        $address->city=$_POST['city'];
+        $address->district=$_POST['district'];
+        $address->address=$_POST['address'];
+        $address->name=$_POST['name'];
+        $address->phone=$_POST['mobile'];
+        $address->company=@$_POST['company'];
+        $address->is_default=1;
+        $address->created_at=time();
+        if($address->save()){
+            yii::$app->getSession()->setFlash('success','收货地址增加成功!');
+        }else{
+            yii::$app->getSession()->setFlash('success','收货地址增加失败!');
+        }
+    
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function  actionSetDefaultAddress($id){
+        $user_guid=yii::$app->user->identity->user_guid;
+        Address::updateAll(['is_default'=>'0'],['user_guid'=>$user_guid]);
+        Address::updateAll(['is_default'=>'1'],['id'=>$id]);
+        yii::$app->getSession()->setFlash('success','设置成功!');
+        return $this->redirect(yii::$app->request->referrer);
+    }
     
     public function actionAddUserProfile(){
         $user_guid= yii::$app->user->identity->user_guid;

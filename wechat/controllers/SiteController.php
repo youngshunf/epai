@@ -27,6 +27,7 @@ use common\models\AuctionRound;
 use common\models\Message;
 use common\models\RegisterCoupon;
 use common\models\Coupon;
+use common\models\MobileVerify;
 
 require_once "../../common/WxpayAPI/lib/WxPay.Api.php";
 require_once "../../common/WxpayAPI/example/WxPay.JsApiPay.php";
@@ -163,11 +164,20 @@ class SiteController extends Controller
        $model=new BandForm();
        
        if($model->load(yii::$app->request->post())){
+           $mobile=@$_POST['mobile'];
+           $verifycode=@$_POST['verfycode'];
+           $model->username=@$_POST['mobile'];
+           $mobileVerify=MobileVerify::findOne(['mobile'=>$mobile,'verify_code'=>$verifycode,'is_valid'=>1]);
+           if(empty($mobileVerify)){
+               //验证码错误
+               yii::$app->getSession()->setFlash('error',"验证码错误!请重新输入");
+                   return $this->render('band',['model'=>$model]);
+           }
            $user=User::findOne(['mobile'=>$model->username]);
            if(!empty($user)){
                $password=md5($model->password);
                if($user->password!=$password){
-                   yii::$app->getSession()->setFlash('error',"密码错误！您的手机号已注册过E拍宝网站,请填写您的登录密码！");
+                   yii::$app->getSession()->setFlash('error',"密码错误！您的手机号已注册过,请填写您的登录密码！");
                    return $this->render('band',['model'=>$model]);
                }
                if($user->is_band==1){
@@ -185,7 +195,8 @@ class SiteController extends Controller
                $currentUser->email=$user->email;
                $currentUser->is_band=1;
                $currentUser->updated_at=time();
-         
+               $mobileVerify->is_valid=0;
+               $mobileVerify->save();
                if(!$currentUser->save()) throw  new Exception();
                
                if($user->openid!=$currentUser->openid){
@@ -194,7 +205,7 @@ class SiteController extends Controller
                
                $trans->commit();
                yii::$app->getSession()->setFlash('success',"绑定成功！");
-               return  $this->redirect(['auction/index']);
+               return  $this->redirect(['auction/round']);
                
                }catch (Exception $e){
                    $trans->rollBack();
@@ -210,6 +221,8 @@ class SiteController extends Controller
                $currentUser->updated_at=time();
              
                if($currentUser->save()){
+                   $mobileVerify->is_valid=0;
+                   $mobileVerify->save();
                    //发放注册优惠
                    $registerCoupon=RegisterCoupon::find()->andWhere(['is_open'=>1])->one();
                    if(!empty($registerCoupon)){
@@ -228,7 +241,7 @@ class SiteController extends Controller
                    }
                    
                    yii::$app->getSession()->setFlash('success',"绑定成功！");
-                   return  $this->redirect(['auction/index']);
+                   return  $this->redirect(['auction/round']);
                }
            }
            
@@ -291,18 +304,13 @@ class SiteController extends Controller
        $user_guid=yii::$app->user->identity->user_guid;
        try{
         $order->is_pay=1;
-        if($order->type==Order::TYPE_GUARANTEE ||$order->type==Order::TYPE_LOTTERY){
-            $order->status=3;
-        }else{
-           $order->status=1;
-        }
+        $order->status=1;
         $order->pay_time=time();
         $order->updated_at=time();
         if(!$order->save()) throw new Exception("订单更新失败!");
         
         if($order->type==Order::TYPE_LOTTERY){
             $lotteryGoods=LotteryGoods::findOne(['goods_guid'=>$order->biz_guid]);
-            
             for( $i=0;$i<$order->number;$i++){
             $lotteryRec=new LotteryRec();
             $lotteryRec->goods_guid=$order->biz_guid;
@@ -337,8 +345,6 @@ class SiteController extends Controller
             $lotteryGoods->updated_at=time();
             if(!$lotteryGoods->save()) throw new Exception();
             
-          
-            
         }elseif ($order->type==Order::TYPE_MALL){
             $goods=MallGoods::findOne(['goods_guid'=>$order->biz_guid]);
             $goods->count_sales +=$order->number;
@@ -357,9 +363,7 @@ class SiteController extends Controller
                 $guaranteeFee->status=1;
                 $guaranteeFee->updated_at=time();
                 if(!$guaranteeFee->save()) throw new Exception();
-            
                 $user=User::findOne(['user_guid'=>$order->user_guid]);
-            
                 $user->role_id=$guaranteeFee->user_role;
                 if($user->role_id==3){
                     $user->guarantee=1;
@@ -477,6 +481,49 @@ class SiteController extends Controller
         return $this->goHome();
     	
     } 
+    
+    public function actionSendVerifyCode(){
+        
+        $data=$_POST['data'];
+        $mobile=$data['mobile'];
+        $verifyCode=rand(1000,9999);
+        $user=User::findOne(['mobile'=>$mobile]);
+      
+        if(!empty($user)){
+           
+            return '手机号已存在!';
+        }
+       
+        $mobileVerify=new MobileVerify();
+        $mobileVerify->mobile=$mobile;
+        $mobileVerify->verify_code=$verifyCode;
+        $mobileVerify->created_at=time();
+        if($mobileVerify->save()){
+           
+            $this->sendSMS($mobile, $verifyCode);
+            return 'sent';
+        }
+    
+        return '发送失败';
+    
+    }
+    public  function sendSMS($mobile,$code){
+        $c = new \TopClient;
+        $c ->appkey = '23901644' ;
+        $c ->secretKey = '3ced7f3f003b651c4935b81710ad3ae3';
+        $req = new \AlibabaAliqinFcSmsNumSendRequest;
+        $req ->setExtend( "" );
+        $req ->setSmsType( "normal" );
+        $req ->setSmsFreeSignName( "小火文玩拍卖短信提示" );
+        $param=[
+            'code'=>(string)$code
+        ];
+        $param=json_encode($param);
+        $req ->setSmsParam( $param );
+        $req ->setRecNum( $mobile );
+        $req ->setSmsTemplateCode( "SMS_70140486" );
+        $resp = $c ->execute( $req );
+    }
        
      
    

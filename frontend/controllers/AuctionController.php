@@ -277,6 +277,7 @@ class AuctionController extends Controller
         $model->count_view+=1;
         $model->save();
       //  $this->layout="@frontend/views/layouts/auction_layout.php";
+       CommonUtil::checkAllAuction();
       
         //判断用户是否交保证金
        $guarantee=0;

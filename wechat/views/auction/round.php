@@ -11,6 +11,7 @@ use yii\widgets\ListView;
 
 $this->title = '专场拍卖';
 $this->params['breadcrumbs'][] = $this->title;
+$description = empty($description)?yii::$app->params['site-desc']:$description;
 ?>
 <style>
 .row {
@@ -54,6 +55,39 @@ $this->params['breadcrumbs'][] = $this->title;
         	that.find('.bid-btn').html('已结束');
     	});
     });    	
-    
+
+    wx.ready(function () {  
+        //分享到朋友圈  
+        wx.onMenuShareTimeline({  
+            title: <?= $this->title?>, // 分享标题  
+            link:window.location.href,  
+            imgUrl: "{pigcms:$res['pic']}", // 分享图标  
+            success: function () {  
+       // 分享成功执行此回调函数  
+//                alert('success');  
+            },  
+            cancel: function () {  
+//                alert('cancel');  
+            }  
+        });  
+
+        //分享给朋友  
+        wx.onMenuShareAppMessage({  
+            title: <?= $this->title?>, // 分享标题  
+            desc: <?= $description ?>,  
+            link:window.location.href,  
+            imgUrl: "{pigcms:$res['pic']}", // 分享图标  
+            trigger: function (res) {  
+                // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回  
+            },  
+            success: function (res) {  
+        // 分享成功执行此回调函数  
+            },  
+            cancel: function (res) {  
+            },  
+            fail: function (res) {  
+            }  
+        });  
+    });  
 
 </script>

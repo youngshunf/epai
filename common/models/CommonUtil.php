@@ -421,20 +421,42 @@ use yii\db\Exception;
          $now=time();
          AuctionGoods::updateAll(['status'=>1],"$now>start_time and $now <end_time and status=0" );
 //          AuctionRound::updateAll(['status'=>1],"$now>start_time and $now <end_time" );
-         $auctionGoods=AuctionGoods::find()->andWhere(" $now >end_time and status=1 or status=0")->all();
+         $auctionGoods=AuctionGoods::find()->andWhere(" $now >end_time and (status =1 or status=0)")->all();
          if(empty($auctionGoods)){
              return true;
          }
          $trans=yii::$app->db->beginTransaction();
          try{
          foreach ($auctionGoods as $k=>$v){
-             $auctionRec=AuctionBidRec::findOne(['goods_guid'=>$v['goods_guid'],'is_leading'=>1]);
+             $auctionRec=AuctionBidRec::find()->andWhere(['goods_guid'=>$v['goods_guid'],'is_leading'=>1])->one();
              if(empty($auctionRec)){
                  AuctionGoods::updateAll(['status'=>99],['goods_guid'=>$v['goods_guid']]);
              }else{
                  AuctionGoods::updateAll(['status'=>2,'deal_user'=>$auctionRec->user_guid,'deal_price'=>$v['current_price']],['goods_guid'=>$v['goods_guid']]);
                  $auctionRec->is_deal=1;
                  if(!$auctionRec->save()) throw new Exception('更新拍卖纪录失败!');
+                 $order=Order::find()->andWhere(['user_guid'=>$auctionRec->user_guid,'biz_guid'=>$v->goods_guid])->one();
+                 if(empty($order)){
+                 $order=new Order();
+                 $order->user_guid=$auctionRec->user_guid;
+                 $order->order_guid=CommonUtil::createUuid();
+                 $order->orderno=Order::getOrderNO(Order::TYPE_AUCTION);
+                 $order->type=Order::TYPE_AUCTION;
+                 $order->goods_name=$v->name;
+                 $order->total_amount=$v['current_price'];
+                 $order->amount=$v['current_price'];
+                 $address=Address::findOne(['user_guid'=>$auctionRec->user_guid,'is_default'=>1]);
+                 if(!empty($address)){
+                     $order->address_id=$address->id;
+                     $order->address=$address['province'].' '.$address['city'].' '.$address['district'].' '.$address['address'].' '.$address['company'].' '.$address['name'].' '.$address['phone'];
+                 }
+                 $order->number=1;
+                 $order->biz_guid=$v->goods_guid;
+                 $order->created_at=time();
+                 if(!$order->save()){
+                     throw new Exception('自动生成订单失败!');
+                 }
+                 }
                  $message=new Message();
                  $url=yii::$app->urlManager->createAbsoluteUrl(['auction/view','id'=>$v['id']]);
                  $content="您好!您参与的拍卖-<span class='red'>".$v['name']."</span>-已结束,恭喜您已成交。请点击下面的按钮进行购买
@@ -448,6 +470,8 @@ use yii\db\Exception;
              return false;
          }
      }
+     
+     
 		
 	}
 	

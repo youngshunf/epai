@@ -28,7 +28,7 @@ class ImageUploader{
             }
             if(is_file($basePath.$path.$fileName)){
                 $thumb=new Image($basePath.$path.$fileName, $thumbDir.$fileName);
-                $thumb->thumb(200,200);
+                $thumb->thumb(300,300);
                 $thumb->out();
             }
         

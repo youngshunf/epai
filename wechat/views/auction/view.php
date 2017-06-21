@@ -16,11 +16,11 @@ $this->title = $model->name;
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 ?>
 
+<div>
+<a href="#">
 <img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo?>" class="img-responsive">
-
+</a>
     <div class="row">
-   
-
   
   <div class="col-md-6">
   <div class="panel-white">
@@ -28,8 +28,16 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
  
     <?php 
     $now=time();
-    if($model->status==1){?>
-       <p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
+    if($now>=$model->start_time&&$now<=$model->end_time){?>
+       <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
+       
+       <?php if(!$hasLove){?>
+		<a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
+		<?php }else{?>
+		 <a class="pull-right btn btn-danger" href="<?= Url::to(['auction/goodslove-cancel','goodsid'=>$model->id])?>" > 已收藏</a>
+		<?php }?>
+       
+       </p>
     	 <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->end_time)?>" >
 				 &nbsp;<span class="countdown-text">距结束</span>&nbsp;&nbsp;
 				 <p class=" pai-countdown" >
@@ -42,7 +50,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <table class="table table-striped">
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span></td>               
+                 <td>当前加价幅度:<span class="red-sm">￥<?= $delta_price?></span></td>               
                  </tr>                
                  <tr>
                  <td>围观: <?= $model->count_view?></span></td>
@@ -58,22 +66,28 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  
                  </div>
                   <div class="  center">
-					<a  class="btn btn-warning agent-btn">代理出价</a>  &nbsp;
-					<a  class="btn btn-danger  bid-btn" >出价</a>
+                  <?php if(yii::$app->user->identity->status==0){?>
+					<span class="red">您已被禁止参与拍卖,请及时购买已经成交的拍品.</span>
+					<?php }else{?>
+					<a  class="btn btn-lg btn-danger  bid-btn" >出价</a>
+					<?php }?>
 				 </div>
-				 <p class="center">
-                 <a href="<?= Url::to(['site/auction-rules'])?>">易拍宝拍卖规则</a>
-                 </p>
+				
 				 <div class="clear"></div>
                  </div>
-    <?php }elseif($model->status == 0){?>
+    <?php }elseif($now<$model->start_time){?>
      <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->start_time)?>" >
      	<?php if($model->status!=3){?>
 				 &nbsp;<span class="countdown-text">距开始</span>&nbsp;&nbsp;
 				 <p class=" pai-countdown" >
                         <span class="J_TimeLeft prev"><i class="days">00</i>天<i class="hours">00</i> 时 <i class="minutes">00</i> 分 <i class="seconds">00</i> 秒</span>
                  </p>      
-             <?php }?>          
+             <?php }?>   
+             	<?php if(!$hasLove){?>
+					 <a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
+					<?php }else{?>
+					  <a class="pull-right btn btn-danger" href="<?= Url::to(['auction/goodslove-cancel','goodsid'=>$model->id])?>" > 已收藏</a>
+					<?php }?>     
                  <div class="auction-info">
                  <table>
                  <tr>
@@ -105,9 +119,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  </div>
                 
                   <div class="center">
-                  <?php if($guarantee==0){?>
-					<a  class="btn btn-info guarantee-btn">提交保证金</a> 
-					<?php }?>
+                 
 					 &nbsp;
 						 <?php if(!empty($model->fixed_price)&&$model->status!=3){?>
 						 
@@ -131,8 +143,15 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 				 </div>
 				 <div class="clear"></div>
                  </div>
-    <?php }else if($model->status >=2 ){?>
-                  <p>成交价格:<span class="red">￥<?= $model->current_price?></span></p>
+    <?php }else if( $now>$model->end_time ){?>
+                  <p>成交价格:<span class="red">￥<?= $model->current_price?></span>
+                  
+                 <?php if(!$hasLove){?>
+					 <a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
+					<?php }else{?>
+					  <a class="pull-right btn btn-danger" href="<?= Url::to(['auction/goodslove-cancel','goodsid'=>$model->id])?>" > 已收藏</a>
+					<?php }?>
+                  </p>
                 <p class="red">已结束</p>
                    <div class="auction-info">
                  <table>
@@ -155,7 +174,9 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  </tr>
                  
                  </table>
+                 <p class="center">
                  
+                 </p>
                  </div>
    
    
@@ -164,20 +185,14 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     <?php if(!yii::$app->user->isGuest){
     if(yii::$app->user->identity->user_guid==$model->deal_user&&$model->status==2){
         ?>
-     <ul class="list-group">
-    <?php $address=Address::findOne(['user_guid'=>yii::$app->user->identity->user_guid,'is_default'=>1]);
-        if(!empty($address)){?>
-   <li class="list-group-item">收货地址:
-   <?= $address->province?>   <?= $address->city?>   <?= $address->district?>   <?= $address->address?>   <?= $address->company?>   <?= $address->name?>   <?= $address->phone?>
-    
-   </li>
-   <?php }?>
-   <li class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</li>
-   </ul>
-   <div class="center">
+     <div class="center">
      <a class="btn btn-danger" href="<?= Url::to(['buy-auction','id'=>$model->id])?>">立即购买</a>
     </div>
     <?php } }?>
+    
+     <p class="center">
+                 <a href="<?= Url::to(['site/auction-rules'])?>">拍卖规则</a>
+       </p>
     
     <div class="auction-rec">
     
@@ -239,7 +254,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
   </div>
 </div>
 
-
+</div>
 
 
 	     <!-- 出价 -->
@@ -264,25 +279,10 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                 <a class="btn btn-primary" href="<?= Url::to(['site/register'])?>">注册</a>
                 </p>
             </div>
-         <?php }elseif($guarantee==0){ ?>
-        <p>您还未交保证金,请先交保证金再参与竞拍</p>
-         <p><label>保证金额:</label><span class="red">￥200</span></p>
-           <div class="form-group center ">
-          <?= Html::a('提交保证金',['auction/submit-guarantee','role'=>'2','goods-guid'=> $model->goods_guid],['class'=>'btn btn-primary','data'=>['method'=>'post']])?>
-            <?= Html::a('成为VIP用户',['auction/submit-guarantee','role'=>'3','goods-guid'=> $model->goods_guid],['class'=>'btn btn-success','data'=>['method'=>'post']])?>
-                          
-             </div> 
-             <p>每次拍卖均须提交保证金,成为VIP用户后参加拍卖不再需要缴纳保证金。VIP用户保证金不退还。</p>
-             <a href="<?= Url::to(['site/auction-rules'])?>" class="pull-right">易拍宝拍卖规则</a>
-             <p class="clear"></p> 
-                         
-             <?php }elseif($guarantee==2){?>
-             <p class="red bold">您已提交保证金退款申请,保证金正在退款中,暂时不能参加拍卖。保证金退款成功后可重新缴纳保证金参与拍卖!</p>
-             
-             
-             <?php }else{?>
+         <?php }else{?>
             	<form action="<?= Url::to(['submit-bid'])?>" method="post" onsubmit="return check()">
             	<p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
+            	<p>当前加价幅度:<span class="red">￥<?= $delta_price?></span></p>
             	<div class="form-group required" >
             	<label class="label-control">竞拍价格:</label>
             	<input type="text" name="bid-price" id="bid-price" class="form-control">
@@ -327,26 +327,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                 <a class="btn btn-primary" href="<?= Url::to(['site/register'])?>">注册</a>
                 </p>
             </div>
-         <?php }elseif($guarantee==0){ ?>
-       <p>您还未交保证金,请先交保证金再参与竞拍</p>
-         <p><label>保证金额:</label><span class="red">￥200</span></p>
-           <div class="form-group center ">
-           <button class="btn btn-primary" id="submit-guarantee">提交保证金</button>
-           <button class="btn btn-success" id="be-vip">成为VIP用户</button>
-                          
-             </div> 
-             <p>每次拍卖均须提交保证金,成为VIP用户后参加拍卖不再需要缴纳保证金。VIP用户保证金不退还。</p>
-             <a href="<?= Url::to(['site/auction-rules'])?>" class="pull-right">易拍宝拍卖规则</a>
-             <p class="clear"></p> 
-            
-             
-                <?php }elseif($guarantee==2){?>
-             <p class="red bold">您已提交保证金退款申请,保证金正在退款中,暂时不能参加拍卖。保证金退款成功后可重新缴纳保证金参与拍卖!</p>
-             
-             
-             <?php }else{?>
+         <?php }else{?>
             	<form action="<?= Url::to(['submit-agent'])?>" method="post" onsubmit="return checkAgent()">
             	<p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
+            	<p>当前加价幅度:<span class="red">￥<?= $delta_price?></span></p>
+            	
             	<div class="form-group required" >
             	<label class="label-control">最高价格:</label>
             	<input type="text" name="agent-price" id="agent-price" class="form-control">            
@@ -502,6 +487,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 </div><!-- /.modal -->
 
 <script type="text/javascript">
+
+setInterval(function(){
+	location.reload();
+},12000);
+
 $(document).ready(function(){
     var that=$(this);
     $(".item-countdown").each(function(){
@@ -543,9 +533,13 @@ $('#be-vip').click(function(){
 	});
 
 var currentPrice=parseInt(<?= $model->current_price?>);
-var deltaPrice=parseInt(<?= $model->delta_price?>);
+var deltaPrice=parseInt(<?= $delta_price?>);
 var times=parseInt(<?= $auctionTimes?>);
 function checkPrice(price){
+	if(price==0){
+		 modalMsg("价格不能为0");
+		    return false;
+	}
 	if(times==0){
 		if(price<currentPrice){
 		    modalMsg("价格不能小于当前价格");
@@ -566,25 +560,35 @@ function checkPrice(price){
 	return true;
 }
 
+var isBidSubmit=false;
 function check(){
+	if(isBidSubmit){
+		return false;
+	}
 	var price=parseInt($("#bid-price").val());
     if(!checkPrice(price)){
         return false;
     }
-
-    showWaiting("正在提交,请稍候...");
+    isBidSubmit=true;
+//     showWaiting("正在提交,请稍候...");
+    $("#submit-bid").modal("hide");
     return true;
 	
 }
 
+var isAgentSubmit=false;
 function checkAgent(){
+	if(isAgentSubmit){
+		return false;
+	}
 	var price=parseInt($("#agent-price").val());
 	
     if(!checkPrice(price)){
         return false;
     }
-
-    showWaiting("正在提交,请稍候...");
+    isAgentSubmit=true;
+    $("#submit-agent").modal("hide");
+//     showWaiting("正在提交,请稍候...");
     return true;
 	
 }
@@ -620,5 +624,44 @@ function checkAddress(){
 	showWaiting('正在提交,请稍候...');
 	return true;
 }
+
+<?php 
+
+$picUrl=empty($picUrl)?yii::$app->params['picUrl']:$picUrl;
+$description = empty($description)?yii::$app->params['site-desc']:$description;
+?>
+wx.ready(function () {  
+    //分享到朋友圈  
+    wx.onMenuShareTimeline({  
+        title: "<?= $this->title?>", // 分享标题  
+        link:window.location.href,  
+        imgUrl: "<?=$picUrl?>", // 分享图标  
+        success: function () {  
+   // 分享成功执行此回调函数  
+//            alert('success');  
+        },  
+        cancel: function () {  
+//            alert('cancel');  
+        }  
+    });  
+
+    //分享给朋友  
+    wx.onMenuShareAppMessage({  
+        title: "<?= $this->title?>", // 分享标题  
+        desc: "<?= $description ?>",  
+        link:window.location.href,  
+        imgUrl:"<?=$picUrl?>", // 分享图标  
+        trigger: function (res) {  
+            // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回  
+        },  
+        success: function (res) {  
+    // 分享成功执行此回调函数  
+        },  
+        cancel: function (res) {  
+        },  
+        fail: function (res) {  
+        }  
+    });  
+});  
 
 </script>

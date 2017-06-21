@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [	'class' => 'yii\grid\ActionColumn',
              	'header'=>'操作',
              	'options'=>['width'=>'200px'],
-            	'template'=>'{view}{update}{delete}{reset-password}',
+            	'template'=>'{view}{update}{delete}{reset-password}{ban-user}',
 	             'buttons'=>[
 					'view'=>function ($url,$model,$key){
 	                     return  Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, ['title' => '查看详细'] );
@@ -49,10 +49,18 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],] );
 					},
 					'reset-password'=>function ($url,$model,$key){
-					return  Html::a(' 重置密码', $url, ['title' => '重置密码', 'data' => [
+					return  Html::a(' 重置密码 | ', $url, ['title' => '重置密码', 'data' => [
 					    'confirm' => '您确定重置此用户的密码吗?',
 					    'method' => 'post',
 					],] );
+					},
+					'ban-user'=>function ($url,$model,$key){
+					if($model->status==1){
+					    return  Html::a(' 禁止拍卖', $url, ['title' => '禁止拍卖',] );
+					}elseif($model->status==0){
+					    return  Html::a(' 允许拍卖', $url, ['title' => '允许拍卖',] );
+					}
+					
 					},
 				]
            	],

@@ -39,14 +39,19 @@ $this->title = '个人中心-'.$model->nick;
 					<span class="icon-user"></span>	个人信息
 					</a>
 				</li>
+				<!-- 
 				<li class="mui-table-view-cell">
 					<a class="mui-navigate-right" href="<?= Url::to(['my-coupon'])?>">
 					<span class="icon-bookmark"></span>	我的优惠券
 					</a>
 				</li>
+				 -->
 					<li class="mui-table-view-cell">
 					<a class="mui-navigate-right" href="<?= Url::to(['my-order'])?>">
 					<i class=" icon-reorder"></i>	我的订单
+					<?php if($unPayOrder!=0){?>
+					<span class="mui-badge mui-badge-danger"><?= $unPayOrder?></span>
+					<?php }?>
 					</a>
 				</li>
 				<li class="mui-table-view-cell">
@@ -55,11 +60,22 @@ $this->title = '个人中心-'.$model->nick;
 					</a>
 				</li>
 				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" href="<?= Url::to(['my-love'])?>">
+					<span class="icon-heart"></span>	我的收藏
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" href="<?= Url::to(['my-address'])?>">
+					<i class="icon-building"></i>	收货地址
+					</a>
+				</li>
+				<!-- 
+				<li class="mui-table-view-cell">
 					<a class="mui-navigate-right" href="<?= Url::to(['my-lottery'])?>">
 					<img src="<?= yii::getAlias('@web')?>/fonts/iconfont-hxtreasure.png">	我的夺宝
 					</a>
 				</li>
-				
+				 -->
 					<li class="mui-table-view-cell">
 					<a class="mui-navigate-right" href="<?= Url::to(['sys-message'])?>">
 					<i class=" icon-envelope"></i>	系统通知
@@ -68,6 +84,7 @@ $this->title = '个人中心-'.$model->nick;
 					<?php }?>
 					</a>
 				</li>
+				<!--  
 				<?php if($model->role_id==3){
 				$vipRefund=VipRefund::findOne(['user_guid'=>$model->user_guid,'status'=>0]);
 				if(empty($vipRefund)){
@@ -78,7 +95,7 @@ $this->title = '个人中心-'.$model->nick;
 					</p>
 				</li>
 				<?php } }?>
-		
+		      -->
 </ul>
 
 

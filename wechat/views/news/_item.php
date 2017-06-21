@@ -19,10 +19,10 @@ use yii\helpers\Url;
                 
         <div class="media-body">
          <h4 class="media-heading"><?= $model->title?></h4>
-         <p class="indent"><?=  CommonUtil::cutHtml($model->content,50)?></p>
+         <p ><?=  CommonUtil::cutHtml($model->content,20)?></p>
          <div class="bottom-info pull-right">
-         <span class="glyphicon glyphicon-time" ></span>  <?= CommonUtil::fomatDate($model->created_at)?>
-         <span class="glyphicon glyphicon-eye-open" ></span> (<?= $model->count_view?>)
+         <span class="glyphicon glyphicon-time" > <?= CommonUtil::fomatDate($model->created_at)?></span>  
+         <span class="glyphicon glyphicon-eye-open" > <?= $model->count_view?></span> 
          </div>
          <div class="clear"></div>
       </div>

@@ -306,6 +306,23 @@ class UserController extends Controller
             ]);
         
     }
+    
+    public function actionBanUser($id)
+    {
+        $model = User::findOne($id);
+    
+        if($model->status==1){
+            $model->status=0;
+        }elseif ($model->status==0){
+            $model->status=1;
+        }
+        if($model->save()){
+            yii::$app->getSession()->setFlash('success','操作成功!');
+            return $this->redirect(yii::$app->request->referrer);
+        }
+        
+        return $this->redirect(yii::$app->request->referrer);
+    }
 
     /**
      * Updates an existing User model.

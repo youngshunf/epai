@@ -10,14 +10,10 @@ use common\models\AuctionCate;
 			<div class="leftmenu">
         <?php  
             $cateid=@$_GET['cateid'];
-           $menuItems[] = ['label' => '拍品分类', 'url' => ['/auction/index']  ];   
+//            $menuItems[] = ['label' => '拍品分类', 'url' => ['/auction/index']  ];   
            $menuItems[] = ['label' => '拍卖专场', 'url' => ['/auction/round']  ];
-           $menuItems[] = ['label' => '天天易拍', 'url' => ['/auction/ongoing']  ];
-           $menuItems[] = ['label' => '全部拍品', 'url' => ['/auction/goods'],'active'=>yii::$app->controller->action->id=='goods'&&empty($cateid)  ];
-           $AuctionCate=AuctionCate::find()->all();
-           foreach ($AuctionCate as $cate){
-               $menuItems[] = ['label' =>$cate->name, 'url' => ['/auction/goods?cateid='.$cate->cateid],'active'=>$cate->cateid==$cateid];
-           }                   
+           $menuItems[] = ['label' => '正在拍卖', 'url' => ['/auction/ongoing']  ];
+           $menuItems[] = ['label' => '全部拍品', 'url' => ['/auction/goods'],'active'=>yii::$app->controller->action->id=='goods'&&empty($cateid)];
             echo Nav::widget([
                 'options' => ['class' => 'nav nav-pills nav-stacked '],
                 'items' => $menuItems,

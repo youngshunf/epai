@@ -1,0 +1,43 @@
+<?php
+    include "TopSdk.php";
+    date_default_timezone_set('Asia/Shanghai'); 
+	$content = @file_get_contents('/Users/xt/Downloads/json.txt');
+	var_dump(json_decode($content));
+	var_dump(urlencode(mb_convert_encoding('阿里发票商家答疑', 'gb2312', 'utf-8')));
+	$c = new TopClient;
+	$c->appkey = '23437908';
+	$c->secretKey = '02c128a923720e3adea4af39b3e9a44c';
+	$req = new AtbItemsGetRequest;
+	$req->setFields("open_iid");
+	$req->setRealDescribe("true");
+	$req->setKeyword("女装");
+	$req->setCashCoupon("true");
+	$req->setVipCard("true");
+	$req->setPageNo("1");
+	$req->setPageSize("40");
+	$req->setSevendaysReturn("true");
+	$req->setSort("price_desc");
+	$req->setStartCredit("1heart");
+	$req->setStartPrice("1");
+	$req->setStartTotalnum("1");
+	$resp = $c->execute($req);
+	print_r($resp);
+
+	$req = new TbkItemGetRequest;
+	$req->setFields("num_iid,title,pict_url,small_images,reserve_price,zk_final_price,user_type,provcity,item_url,seller_id,volume,nick");
+	$req->setQ("女装");
+	$req->setCat("16,18");
+	$req->setItemloc("杭州");
+	$req->setSort("tk_rate_des");
+	$req->setIsTmall("false");
+	$req->setIsOverseas("false");
+	$req->setStartPrice("10");
+	$req->setEndPrice("10");
+	$req->setStartTkRate("123");
+	$req->setEndTkRate("123");
+	$req->setPlatform("1");
+	$req->setPageNo("123");
+	$req->setPageSize("20");
+	$resp = $c->execute($req);
+	print_r($resp);
+?>

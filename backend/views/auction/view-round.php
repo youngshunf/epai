@@ -85,15 +85,16 @@ $this->params['breadcrumbs'][] = $this->title;
             	'template'=>'{view-goods}{update-goods}{delete-goods}',
 	             'buttons'=>[
 					'view-goods'=>function ($url,$model,$key){
-	                     return  Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, ['title' => '查看分类'] );
+	                     return  Html::a('查看 | ', $url, ['title' => '查看分类'] );
 					},
 					'update-goods'=>function ($url,$model,$key){
 					
-					       return  Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, ['title' => '修改分类'] );					       												   
+					       return  Html::a('修改 | ', $url, ['title' => '修改分类'] );					       												   
 				},
 					'delete-goods'=>function ($url,$model,$key){
-					return  Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, ['title' => '删除分类', 'data-confirm'=>'是否确定删除该分类以及该分类下的所有资讯？'] );
+					return  Html::a('删除 | ', $url, ['title' => '删除分类', 'data-confirm'=>'是否确定删除该分类以及该分类下的所有资讯？'] );
 					},
+					
 					
 				]
            	],

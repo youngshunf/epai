@@ -53,25 +53,25 @@ FlatlabAsset::register($this);
 				    'active'=>yii::$app->controller->id=='user'
 				];
 				$menuItems[] = [
-				    'label' => '平台拍品',
+				    'label' => '拍卖管理',
 				    'url' => ['/auction/index'],
 				    'active'=>yii::$app->controller->id=='auction'
 				];
-				$menuItems[] = [
-				    'label' => '第三方拍品',
-				    'url' => ['/sp-auction/index'],
-				    'active'=>yii::$app->controller->id=='sp-auction'
-				];
-				$menuItems[] = [
-				    'label' => '一元夺宝',
-				    'url' => ['/lottery/index'],
-				    'active'=>yii::$app->controller->id=='lottery'
-				];		
-				$menuItems[] = [
-				    'label' => 'E拍商城',
-				    'url' => ['/mall/index'],
-				    'active'=>yii::$app->controller->id=='mall'
-				];
+// 				$menuItems[] = [
+// 				    'label' => '第三方拍品',
+// 				    'url' => ['/sp-auction/index'],
+// 				    'active'=>yii::$app->controller->id=='sp-auction'
+// 				];
+// 				$menuItems[] = [
+// 				    'label' => '一元夺宝',
+// 				    'url' => ['/lottery/index'],
+// 				    'active'=>yii::$app->controller->id=='lottery'
+// 				];		
+// 				$menuItems[] = [
+// 				    'label' => 'E拍商城',
+// 				    'url' => ['/mall/index'],
+// 				    'active'=>yii::$app->controller->id=='mall'
+// 				];
 				$menuItems[] = [
 				    'label' => '资讯管理',
 				    'url' => ['/news/index'],
@@ -82,11 +82,11 @@ FlatlabAsset::register($this);
 				    'url' => ['/order/index'],
 				    'active'=>yii::$app->controller->id=='order'
 				];
-				$menuItems[] = [
-				    'label' => '优惠券管理',
-				    'url' => ['/coupon/index'],
-				    'active'=>yii::$app->controller->id=='coupon'
-				];
+// 				$menuItems[] = [
+// 				    'label' => '优惠券管理',
+// 				    'url' => ['/coupon/index'],
+// 				    'active'=>yii::$app->controller->id=='coupon'
+// 				];
                 $menuItems[] = [
                     'label' => '注销 (' . yii::$app->user->identity->username. ')',
                     'url' => ['/site/logout'],

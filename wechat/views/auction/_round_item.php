@@ -34,7 +34,7 @@ use common\models\AuctionGoods;
                 <span class="btn btn-danger  pull-right">竞拍中</span>
 				 <div class="clear"></div>
                  </div>
-                 <?php }elseif ($now>$model->end_time){?>
+                 <?php }elseif ( $now>$model->end_time){?>
                   <div  >
         				 &nbsp;<span class="btn btn-default  pull-right">已结束</span>&nbsp;&nbsp;
         				 <div class="clear"></div>
@@ -52,23 +52,6 @@ use common\models\AuctionGoods;
           
           <?php }?>
                  <br>
-					<div class="row">
-					<?php $roundGoods=AuctionGoods::find()->andWhere(['roundid'=>$model->id])->limit(4)->all();
-					foreach ($roundGoods as $k=>$v){
-					?>
-					<div class="col-md-3 col-xs-6">
-					    <a href="<?= Url::to(['view','id'=>$v->id])?>">
-					    <div class="c_img">
-                		<img src="<?= yii::getAlias('@photo').'/'.$v->path.'thumb/'.$v->photo?>"  class="img-responsive">
-                		<div class="c_words">
-                		当前价:￥ <?= $v->current_price?>
-                		</div>
-                		</div>
-                		</a>	
-					</div>
-					
-					<?php }?>
-					</div>
 					
 					<?php if(!empty($model->source)){?>
 					<p>拍品提供:  <?=$model->source?></p>
