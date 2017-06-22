@@ -421,7 +421,7 @@ use yii\db\Exception;
          $now=time();
          AuctionGoods::updateAll(['status'=>1],"$now>start_time and $now <end_time and status=0" );
 //          AuctionRound::updateAll(['status'=>1],"$now>start_time and $now <end_time" );
-         $auctionGoods=AuctionGoods::find()->andWhere(" $now >end_time and (status =1 or status=0)")->all();
+         $auctionGoods=AuctionGoods::find()->andWhere(" $now >end_time and status = 1 ")->all();
          if(empty($auctionGoods)){
              return true;
          }

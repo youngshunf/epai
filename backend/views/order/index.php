@@ -47,10 +47,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [	'class' => 'yii\grid\ActionColumn',
              	'header'=>'操作',
              	'options'=>['width'=>'200px'],
-            	'template'=>'{view}{delete}{cancel}',
+            	'template'=>'{view}{update}{delete}{cancel}',
 	             'buttons'=>[
 					'view'=>function ($url,$model,$key){
 	                     return  Html::a('查看 | ', $url, ['title' => '查看详细'] );
+					},
+					'update'=>function ($url,$model,$key){
+					return  Html::a('修改 | ', $url, ['title' => '查看详细'] );
 					},
 					'delete'=>function ($url,$model,$key){
 					return  Html::a('删除 |', $url, ['title' => '删除订单', 'data' => [

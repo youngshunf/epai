@@ -91,8 +91,9 @@ class Order extends \yii\db\ActiveRecord
         if($type==self::TYPE_MERCHANT_GUARANTEE){
             $prefix="MG";
         }    
-        
-        return $prefix.date("YmdHis").rand(100, 999);      
+        $mtime=explode(' ', microtime());
+        $time=round($mtime[1]+$mtime[0]);
+        return $prefix.date("YmdHis").rand(10000, 99999);      
     }
     
     public  function getUser(){

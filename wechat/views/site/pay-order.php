@@ -19,6 +19,7 @@ $hasAddress=empty($order->address)?0:1;
     <h5><?= Html::encode($this->title) ?></h5>
  				<p><label>订单状态:</label><span class="red"><?= CommonUtil::getDescByValue('order', 'status', $order->status)?></span></p>
                  <p><label>商品名称:</label><?=$order->goods_name?></p>
+                 <p><label>订单编号:</label><span ><?= $order->orderno?></span></p>
                  <p><label>金额:</label><span class="red">￥<?= $order->amount?></span></p>
                  <p><label>数量:</label><span class="green"><?= $order->number?></span></p>
                  <?php if(!empty($order->address)){?>
