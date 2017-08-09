@@ -30,6 +30,7 @@ class PayNotifyCallBack extends \WxPayNotify
                 $trans=yii::$app->db->beginTransaction();
                 try{
                     $order->is_pay=1;
+                    $order->status=1;
                     $order->pay_time=time();
                     if(!$order->save()) throw  new Exception("update order error");
                     $trans->commit();

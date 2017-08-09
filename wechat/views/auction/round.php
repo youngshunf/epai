@@ -9,7 +9,7 @@ use yii\widgets\ListView;
 /* @var $searchModel common\models\SearchAuctionGoods */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = '专场拍卖';
+$this->title = '小火文玩拍卖';
 $this->params['breadcrumbs'][] = $this->title;
 $description = empty($description)?yii::$app->params['site-desc']:$description;
 ?>

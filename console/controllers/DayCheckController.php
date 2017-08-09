@@ -260,4 +260,28 @@ class DayCheckController extends Controller{
        }
        CommonUtil::LogMsg("总共有".$i."个用户被自动码放了位置");
     }
+    
+    /**
+     * The descriptions of functions.
+     * @desc: 自动确认收货
+     * @author: youngshunf
+     * @date: 2017年6月23日
+     * @access public
+     * @return void
+     */
+    public  function actionAutoConfirm() {
+        
+        $now=time();
+        $i=0;
+        foreach (Order::find()->andWhere(['status'=>2])->each(10) as $order){
+            $sevenDay=3600*24*7;//3天
+            if(time()-$order->sent_time>=$sevenDay){
+                $order->status=3;
+                $order->confirm_time=time();
+                $order->save();
+                $i++;
+            }
+        }
+      echo  CommonUtil::LogMsg("总共有".$i."条记录更新");
+    }
 }

@@ -80,6 +80,9 @@ use yii\db\Exception;
 		    ];
 		    
 		}
+		public static  function LogMsg($msg){
+		    return date('Y-m-d H:i:s').':'.$msg.'\n';
+		}
 		
 		public static function getMonthDay($month)
 		{
@@ -456,6 +459,7 @@ use yii\db\Exception;
                  if(!$order->save()){
                      throw new Exception('自动生成订单失败!');
                  }
+                 self::SendTemplateMessage($order->user_guid, $v->id);
                  }
                  $message=new Message();
                  $url=yii::$app->urlManager->createAbsoluteUrl(['auction/view','id'=>$v['id']]);
@@ -469,6 +473,73 @@ use yii\db\Exception;
              $trans->rollBack();
              return false;
          }
+     }
+     
+     public static  function actionAutoConfirm() {
+     
+         $now=time();
+         $i=0;
+         foreach (Order::find()->andWhere(['status'=>2])->each(10) as $order){
+             $sevenDay=3600*24*7;//3天
+             if(time()-$order->sent_time>=$sevenDay){
+                 $order->status=3;
+                 $order->save();
+                 $i++;
+             }
+         }
+        
+     }
+     
+     public static  function SendTemplateMessage($user_guid,$goodsid){
+          
+         if(empty($user_guid)){
+             return false;
+         }
+         $sendModel=new WeChatTemplate(yii::$app->params['appid'], yii::$app->params['appsecret']);
+         $user=User::findOne(['user_guid'=>$user_guid]);
+         $goods=AuctionGoods::findOne($goodsid);
+         if($user->role_id==0){
+             return false;
+         }
+         $data=[];
+         $data['first']=[
+             "value"=>'您参与的拍卖已结束,您已中拍，请尽快购买!',
+             "color"=>"#173177"
+         ];
+         $data['keyword1']=[
+             "value"=>$goods->name,
+             "color"=>"#173177"
+         ];
+         $data['keyword2']=[
+             "value"=>$goods->current_price,
+             "color"=>"#173177"
+         ];
+         $data['keyword3']=[
+             "value"=>$goods->count_auction,
+             "color"=>"#173177"
+         ];
+         $data['keyword4']=[
+             "value"=>'拍卖结束',
+             "color"=>"#173177"
+         ];
+         $data['keyword5']=[
+             "value"=>CommonUtil::fomatTime($goods->end_time),
+             "color"=>"#173177"
+         ];
+         $result=false;
+         $finalData=[
+             "touser"=>$user->openid,
+             "template_id"=>'RJL21kj3WHFNaj4bWaPjNupB3m0wAEdhcQITKiz9A2Y',
+             "url"=>'http://wechat.1paibao.net/auction/view?id='.$goodsid,
+             "topcolor"=>"#FF0000",
+             "data"=>$data
+         ];
+         $res=$sendModel->send_template_message($finalData);
+          
+         if($res['errmsg']=='ok'){
+             $result=true;
+         }
+         return $result;
      }
      
      

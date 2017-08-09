@@ -40,7 +40,7 @@ class Order extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['type', 'is_pay', 'pay_time', 'created_at', 'updated_at'], 'integer'],
+            [['type', 'is_pay', 'pay_time', 'created_at', 'updated_at','status'], 'integer'],
             [['amount'], 'number'],
             [['user_guid', 'order_guid', 'orderno', 'biz_guid'], 'string', 'max' => 48]
         ];

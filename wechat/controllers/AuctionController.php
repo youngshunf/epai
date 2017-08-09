@@ -916,6 +916,10 @@ class AuctionController extends Controller
             "value"=>$goods->count_auction,
             "color"=>"#173177"
         ];
+        $data['keyword4']=[
+            "value"=>'拍卖中',
+            "color"=>"#173177"
+        ];
         $data['keyword5']=[
             "value"=>CommonUtil::fomatTime($goods->end_time),
             "color"=>"#173177"
