@@ -68,14 +68,13 @@ class SearchOrder extends Order
             'sent_time' => $this->sent_time,
             'confirm_time' => $this->confirm_time,
             'cancel_time' => $this->cancel_time,
-            'created_at' => $this->created_at,
+            'biz_guid' => $this->biz_guid,
             'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'user_guid', $this->user_guid])
             ->andFilterWhere(['like', 'order_guid', $this->order_guid])
             ->andFilterWhere(['like', 'orderno', $this->orderno])
-            ->andFilterWhere(['like', 'biz_guid', $this->biz_guid])
             ->andFilterWhere(['like', 'goods_name', $this->goods_name])
             ->andFilterWhere(['like', 'express_number', $this->express_number]);
 

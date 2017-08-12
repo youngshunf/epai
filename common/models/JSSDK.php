@@ -54,15 +54,22 @@ class JSSDK {
       // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
       $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$accessToken";
       $res = json_decode($this->httpGet($url));
-      $ticket = $res->ticket;
-      if ($ticket) {
-        $data=[];
-        $data['expire_time'] = time() + 7000;
-        $data['jsapi_ticket'] = $ticket;
-        $fp = fopen("jsapi_ticket.json", "w");
-        fwrite($fp, json_encode($data));
-        fclose($fp);
+     
+      try {
+          $ticket = $res->ticket;
+          if ($ticket) {
+              $data=[];
+              $data['expire_time'] = time() + 7000;
+              $data['jsapi_ticket'] = $ticket;
+              $fp = fopen("jsapi_ticket.json", "w");
+              fwrite($fp, json_encode($data));
+              fclose($fp);
+          }
+      }catch (\Exception $e){
+          $ticket = $data->jsapi_ticket;
       }
+     
+      
     } else {
       $ticket = $data->jsapi_ticket;
     }

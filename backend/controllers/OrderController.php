@@ -13,6 +13,7 @@ use common\models\WxpayRec;
 use yii\db\Exception;
 use common\models\WxpayRefundRec;
 use yii\filters\AccessControl;
+use common\models\AuctionGoods;
 
 require_once "../../common/WxpayAPI/lib/WxPay.Api.php";
 require_once '../../common/WxpayAPI/example/log.php';
@@ -44,6 +45,15 @@ class OrderController extends Controller
     public function actionIndex()
     {
         $searchModel = new SearchOrder();
+        if(isset($_GET['roundid'])){
+            $roundid=$_GET['roundid'];
+            $goods=AuctionGoods::findAll(['roundid'=>$roundid]);
+            $ids=[];
+            foreach ($goods as $v){
+                $ids[]=$v->goods_guid;
+            }
+            $searchModel->biz_guid=$ids;
+        }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

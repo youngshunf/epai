@@ -542,6 +542,59 @@ use yii\db\Exception;
          return $result;
      }
      
+     public static  function SendOnlineMessage($user_guid,$roundid){
+         
+         if(empty($user_guid)){
+             return false;
+         }
+         $sendModel=new WeChatTemplate(yii::$app->params['appid'], yii::$app->params['appsecret']);
+         $user=User::findOne(['user_guid'=>$user_guid]);
+         $round=AuctionRound::findOne($roundid);
+         $count=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->count();
+         $name=$round->name;
+         if($user->role_id==0){
+             return false;
+         }
+         $data=[];
+         $data['first']=[
+             "value"=>"您好,最新一期拍卖已上架- $name !",
+             "color"=>"#173177"
+         ];
+         $data['keyword1']=[
+             "value"=>$count . '件',
+             "color"=>"#173177"
+         ];
+         $data['keyword2']=[
+             "value"=>0 ,
+             "color"=>"#173177"
+         ];
+         $data['keyword3']=[
+             "value"=>$round->name,
+             "color"=>"#173177"
+         ];
+         $data['keyword4']=[
+             "value"=>CommonUtil::fomatTime($round->end_time),
+             "color"=>"#173177"
+         ];
+         $data['remark']=[
+             "value"=>'点击进入拍卖专场 >>',
+             "color"=>"#173177"
+         ];
+         $result=false;
+         $finalData=[
+             "touser"=>$user->openid,
+             "template_id"=>'8qeY18Z3OgxOpzhFiqa2duV4R91IvCl4JtUjfIsuil4',
+             "url"=>'http://wechat.1paibao.net/auction/round-view?id='.$roundid,
+             "topcolor"=>"#FF0000",
+             "data"=>$data
+         ];
+         $res=$sendModel->send_template_message($finalData);
+         
+         if($res['errmsg']=='ok'){
+             $result=true;
+         }
+         return $result;
+     }
      
 		
 	}

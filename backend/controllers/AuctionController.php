@@ -17,6 +17,7 @@ use common\models\AuctionRound;
 use common\models\AuctionBidRec;
 use common\models\GuaranteeFee;
 use common\models\Message;
+use common\models\User;
 
 /**
  * AuctionController implements the CRUD actions for AuctionGoods model.
@@ -82,6 +83,22 @@ class AuctionController extends Controller
         return $this->render('round', [
                 'dataProvider' => $dataProvider,
         ]);
+    }
+    
+    public function actionSendMessage($id){
+//         $user_guid='c6d6e420-804d-11e5-8e00-74e6e250d657';
+        $res=0;
+        foreach (User::find()->each(100) as $user){
+            if(CommonUtil::SendOnlineMessage($user->user_guid, $id)){
+                $res++;
+            }
+        }
+        yii::$app->getSession()->setFlash('success',"发送成功,已通知 $res 个用户!");
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function actionRoundOrder($id){
+        return $this->redirect(['order/index','roundid'=>$id]);
     }
     
     public function actionOffline($id){

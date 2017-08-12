@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             
                 [	'class' => 'yii\grid\ActionColumn',
              	'header'=>'操作',
-            	'template'=>'{view-round}{update-round}{offline}',
+            	'template'=>'{view-round}{update-round}{offline}{round-order}{send-message}',
 	             'buttons'=>[
 					'view-round'=>function ($url,$model,$key){
 	                     return  Html::a('查看 | ', $url, ['title' => '查看分类'] );
@@ -52,18 +52,25 @@ $this->params['breadcrumbs'][] = $this->title;
 					'update-round'=>function ($url,$model,$key){
 					
 					       return  Html::a('修改 | ', $url, ['title' => '修改分类'] );					       												   
-				},
+				    },
 					'delete-round'=>function ($url,$model,$key){
 					return  Html::a('删除 |', $url, ['title' => '删除分类', 'data-confirm'=>'是否确定删除该分类以及该分类下的所有资讯？'] );
 					},
 					'offline'=>function ($url,$model,$key){
 					if($model->offline==0){
-					    return  Html::a('下架', $url, ['title' => '下架'] );
+					    return  Html::a('下架 | ', $url, ['title' => '下架'] );
 					}elseif($model->offline==1){
-					    return  Html::a('上架', $url, ['title' => '上架']);
+					    return  Html::a('上架 | ', $url, ['title' => '上架']);
 					}
 						
 					},
+					'round-order'=>function ($url,$model,$key){
+					    return  Html::a('查看订单 | ', $url, ['title' => '查看订单'] );
+					},
+					'send-message'=>function ($url,$model,$key){
+					return  Html::a('发送通知  ', $url, ['title' => '发送通知'] );
+					},
+					
 				]
            	],
         ],
