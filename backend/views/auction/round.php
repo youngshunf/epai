@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             
                 [	'class' => 'yii\grid\ActionColumn',
              	'header'=>'操作',
-            	'template'=>'{view-round}{update-round}{offline}{round-order}{send-message}',
+            	'template'=>'{view-round}{update-round}{offline}{round-order}{send-message-online}{send-message-ongoing}{send-message-offline}',
 	             'buttons'=>[
 					'view-round'=>function ($url,$model,$key){
 	                     return  Html::a('查看 | ', $url, ['title' => '查看分类'] );
@@ -67,8 +67,14 @@ $this->params['breadcrumbs'][] = $this->title;
 					'round-order'=>function ($url,$model,$key){
 					    return  Html::a('查看订单 | ', $url, ['title' => '查看订单'] );
 					},
-					'send-message'=>function ($url,$model,$key){
-					return  Html::a('发送通知  ', $url, ['title' => '发送通知'] );
+					'send-message-online'=>function ($url,$model,$key){
+					return  Html::a('上架通知 | ', $url, ['title' => '发送通知'] );
+					},
+					'send-message-ongoing'=>function ($url,$model,$key){
+					return  Html::a('拍卖中通知 | ', $url, ['title' => '发送通知'] );
+					},
+					'send-message-offline'=>function ($url,$model,$key){
+					return  Html::a('结束通知  ', $url, ['title' => '发送通知'] );
 					},
 					
 				]

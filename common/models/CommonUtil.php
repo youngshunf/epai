@@ -542,7 +542,7 @@ use yii\db\Exception;
          return $result;
      }
      
-     public static  function SendOnlineMessage($user_guid,$roundid){
+     public static  function SendOnlineMessage($user_guid,$roundid,$type){
          
          if(empty($user_guid)){
              return false;
@@ -556,8 +556,16 @@ use yii\db\Exception;
              return false;
          }
          $data=[];
+         $title='';
+         if($type==1){
+             $title='亲，小火文玩最新专场拍卖全新上线!';
+         }elseif ($type==2){
+             $title='亲，专场拍卖正在进行中，我们约吗？';
+         }elseif ($type==3){
+             $title='亲，拍卖马上开始结束，藏品在呼唤您哦！';
+         }
          $data['first']=[
-             "value"=>"您好,最新一期拍卖已上架- $name !",
+             "value"=>$title,
              "color"=>"#173177"
          ];
          $data['keyword1']=[

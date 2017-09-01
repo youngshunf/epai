@@ -1,6 +1,6 @@
 <?php
 
-namespace wechat\Controllers;
+namespace wechat\controllers;
 
 use Yii;
 use common\models\Wish;

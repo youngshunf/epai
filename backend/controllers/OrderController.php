@@ -14,6 +14,8 @@ use yii\db\Exception;
 use common\models\WxpayRefundRec;
 use yii\filters\AccessControl;
 use common\models\AuctionGoods;
+use common\models\CommonUtil;
+use common\models\Address;
 
 require_once "../../common/WxpayAPI/lib/WxPay.Api.php";
 require_once '../../common/WxpayAPI/example/log.php';
@@ -45,6 +47,7 @@ class OrderController extends Controller
     public function actionIndex()
     {
         $searchModel = new SearchOrder();
+        $roundid='';
         if(isset($_GET['roundid'])){
             $roundid=$_GET['roundid'];
             $goods=AuctionGoods::findAll(['roundid'=>$roundid]);
@@ -59,6 +62,7 @@ class OrderController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'roundid'=>$roundid
         ]);
     }
 
@@ -73,6 +77,88 @@ class OrderController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
+    
+    public function actionExportOrder(){
+        if(!empty($_GET['roundid'])){
+            $roundid=$_GET['roundid'];
+            $goods=AuctionGoods::findAll(['roundid'=>$roundid]);
+            $ids=[];
+            foreach ($goods as $v){
+                $ids[]=$v->goods_guid;
+            }
+            $model=Order::find()->andWhere(['biz_guid'=>$ids])->all();
+        }else{
+            $model=Order::find()->all();
+        }
+        
+        if(empty($model)){
+            yii::$app->getSession()->setFlash('error','没有数据哦!');
+            return $this->redirect(yii::$app->getRequest()->referrer);
+        }
+        
+        $resultExcel=new \PHPExcel();
+        $resultExcel->getActiveSheet()->setCellValue('A1','序号');
+        $resultExcel->getActiveSheet()->setCellValue('B1','是否支付');
+        $resultExcel->getActiveSheet()->setCellValue('C1','收货人');
+        $resultExcel->getActiveSheet()->setCellValue('D1','收货人');
+        $resultExcel->getActiveSheet()->setCellValue('E1','收货电话');
+        $resultExcel->getActiveSheet()->setCellValue('F1','收货电话');
+        $resultExcel->getActiveSheet()->setCellValue('G1','收货地址');
+        $resultExcel->getActiveSheet()->setCellValue('H1','商品名称');
+        $resultExcel->getActiveSheet()->setCellValue('I1','已支付金额');
+        $resultExcel->getActiveSheet()->setCellValue('J1','待支付金额');
+        $resultExcel->getActiveSheet()->setCellValue('K1','电话');
+        $resultExcel->getActiveSheet()->setCellValue('L1','状态');
+        $resultExcel->getActiveSheet()->setCellValue('M1','支付时间');
+        $resultExcel->getActiveSheet()->setCellValue('N1','订单编号');
+        $resultExcel->getActiveSheet()->setCellValue('O1','数量');
+        $resultExcel->getActiveSheet()->setCellValue('P1','快递公司');
+        $resultExcel->getActiveSheet()->setCellValue('Q1','快递单号');
+        $resultExcel->getActiveSheet()->setCellValue('R1','订单时间');
+        
+        $i=2;
+        foreach ($model as $k=>$v){
+            $resultExcel->getActiveSheet()->setCellValue('A'.$i,$k+1);
+            $resultExcel->getActiveSheet()->setCellValue('B'.$i,CommonUtil::getDescByValue('order', 'is_pay', $v->is_pay));
+            $address=Address::findOne($v->address_id);
+            if(!empty($address)){
+                $resultExcel->getActiveSheet()->setCellValue('C'.$i,$address->name);
+                $resultExcel->getActiveSheet()->setCellValue('D'.$i,$address->name);
+                $resultExcel->getActiveSheet()->setCellValue('E'.$i,$address->phone);
+                $resultExcel->getActiveSheet()->setCellValue('F'.$i,$address->phone);
+                $resultExcel->getActiveSheet()->setCellValue('G'.$i,$address->province.$address->city.$address->district.$address->address);
+            }
+            $resultExcel->getActiveSheet()->setCellValue('H'.$i,$v->goods_name);
+            $resultExcel->getActiveSheet()->setCellValue('I'.$i,$v->is_pay==1?$v->amount:0);
+            $resultExcel->getActiveSheet()->setCellValue('J'.$i,$v->is_pay==1?0:$v->amount);
+            $resultExcel->getActiveSheet()->setCellValue('K'.$i,$v->user->mobile);
+            $resultExcel->getActiveSheet()->setCellValue('L'.$i,CommonUtil::getDescByValue('order', 'status', $v->status));
+            $resultExcel->getActiveSheet()->setCellValue('M'.$i,CommonUtil::fomatTime($v->pay_time));
+            $resultExcel->getActiveSheet()->setCellValue('N'.$i,$v->orderno);
+            $resultExcel->getActiveSheet()->setCellValue('O'.$i,$v->number);
+            $resultExcel->getActiveSheet()->setCellValue('P'.$i,$v->express_company);
+            $resultExcel->getActiveSheet()->setCellValue('Q'.$i,$v->express_number);
+            $resultExcel->getActiveSheet()->setCellValue('R'.$i,CommonUtil::fomatTime($v->created_at));
+            $i++;
+        }
+        
+        //设置导出文件名
+        $outputFileName ="拍卖订单".date('Y-m-d',time()).'.xls';
+        $xlsWriter = new \PHPExcel_Writer_Excel5($resultExcel);
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");
+        header('Content-Disposition:inline;filename="'.$outputFileName.'"');
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: no-cache");
+        
+        $xlsWriter->save( "php://output" );
+        
+    }
+    
     
     public function actionSendGoods(){
         $order=Order::findOne(['order_guid'=>$_POST['order_guid']]);

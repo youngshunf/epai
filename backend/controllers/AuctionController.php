@@ -58,6 +58,7 @@ class AuctionController extends Controller
      */
     public function actionIndex()
     {
+        return $this->redirect('round');
          $dataProvider = new ActiveDataProvider([
             'query'=>AuctionCate::find(),
             'pagination'=>[
@@ -85,16 +86,34 @@ class AuctionController extends Controller
         ]);
     }
     
-    public function actionSendMessage($id){
-//         $user_guid='c6d6e420-804d-11e5-8e00-74e6e250d657';
+    public function actionSendMessageOnline($id){
+        $res=$this->SendMessage($id, 1);
+        
+        yii::$app->getSession()->setFlash('success',"发送成功,已通知 $res 个用户!");
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function actionSendMessageOngoing($id){
+        $res=$this->SendMessage($id, 2);
+        
+        yii::$app->getSession()->setFlash('success',"发送成功,已通知 $res 个用户!");
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function actionSendMessageOffline($id){
+        $res=$this->SendMessage($id, 3);
+        yii::$app->getSession()->setFlash('success',"发送成功,已通知 $res 个用户!");
+        return $this->redirect(yii::$app->request->referrer);
+    }
+    
+    public function SendMessage($id,$type){
         $res=0;
         foreach (User::find()->each(100) as $user){
-            if(CommonUtil::SendOnlineMessage($user->user_guid, $id)){
+            if(CommonUtil::SendOnlineMessage($user->user_guid, $id,$type)){
                 $res++;
             }
         }
-        yii::$app->getSession()->setFlash('success',"发送成功,已通知 $res 个用户!");
-        return $this->redirect(yii::$app->request->referrer);
+        return $res;
     }
     
     public function actionRoundOrder($id){

@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\CommonUtil;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\SearchOrder */
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h5><?= Html::encode($this->title) ?></h5>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
+    <p><a class="btn btn-success" href="<?= Url::to(['export-order','roundid'=>$roundid]) ?>">导出订单</a></p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

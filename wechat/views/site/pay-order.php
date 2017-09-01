@@ -128,10 +128,10 @@ function checkAddress(){
 	    modalMsg('请选择城市');
 	    return false;
 	}
-	if(!$('#district').val()){
-	    modalMsg('请选择区县');
-	    return false;
-	}
+// 	if(!$('#district').val()){
+// 	    modalMsg('请选择区县');
+// 	    return false;
+// 	}
 	if(!$('#address').val()){
 	    modalMsg('请填写地址');
 	    return false;

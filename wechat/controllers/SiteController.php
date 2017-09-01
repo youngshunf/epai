@@ -404,7 +404,7 @@ class SiteController extends Controller
     
     }
 
-/*      public function actionLogin()
+      public function actionLogin()
     {
      $model=new LoginForm();
     
@@ -413,18 +413,18 @@ class SiteController extends Controller
      }
          
      return $this->render('login',['model'=>$model]);
-    }   */
+    }   
     
     /**
      * 认证服务号登录,网页授权登录
      * @return \yii\web\Response
      */
-     public function actionLogin()
-    {
-        $appid=yii::$app->params['appid'];
-        $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
-        return $this->redirect($url);
-    }  
+//      public function actionLogin()
+//     {
+//         $appid=yii::$app->params['appid'];
+//         $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+//         return $this->redirect($url);
+//     }  
     
     /**
      * 认证服务号登录处理
