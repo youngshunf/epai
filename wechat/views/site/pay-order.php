@@ -20,11 +20,15 @@ $hasAddress=empty($order->address)?0:1;
  				<p><label>订单状态:</label><span class="red"><?= CommonUtil::getDescByValue('order', 'status', $order->status)?></span></p>
                  <p><label>商品名称:</label><?=$order->goods_name?></p>
                  <p><label>订单编号:</label><span ><?= $order->orderno?></span></p>
-                 <p><label>金额:</label><span class="red">￥<?= $order->amount?></span></p>
+                 <p><label>商品金额:</label><span class="red">￥<?= $order->total_amount?></span></p>
+                 <?php if($order->seller_fee>0){?>
+                  <p><label>卖家佣金:</label><span class="red">￥<?= $order->seller_fee?></span></p>
+                 <?php }?>
                  <p><label>数量:</label><span class="green"><?= $order->number?></span></p>
                  <?php if(!empty($order->address)){?>
                  <p><label>收货地址:</label><span ><?= $order->address?></span></p>
                  <?php }?>
+                 <p><span class="pull-right"><label>实际支付金额:</label><span class="red">￥<?= $order->amount?></span></span></p>
                 
             <?php if($order->status==0){?>
              <p class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</p>

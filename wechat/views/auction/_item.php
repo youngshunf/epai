@@ -57,7 +57,9 @@ use yii\helpers\Url;
 				<div class="pai-content">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right"> 当前价格:<i class="red">￥<?= $model->current_price?></i></span></p>				 
-				 &nbsp;<span class="red">已结束</span>&nbsp;&nbsp;
+				 &nbsp;<span class="red-sm">
+				 <?= CommonUtil::getDescByValue('auction_goods','status',$model->status)?>
+				 </span>&nbsp;&nbsp;
                   <div class="item-button">
 					<a href="<?= Url::to(['view','id'=>$model->id])?>" class="btn btn-default">围观(<?= $model->count_view?>)</a>  &nbsp;
 				 </div>

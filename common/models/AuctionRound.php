@@ -38,7 +38,7 @@ class AuctionRound extends \yii\db\ActiveRecord
         return [
             [['start_time', 'end_time', 'name', 'desc'], 'required'],
             [['desc'], 'string'],
-            [['created_at', 'updated_at','sort'], 'integer'],
+            [['created_at', 'updated_at','sort','seller_fee'], 'integer'],
             [['user_guid', 'path', 'photo'], 'string', 'max' => 64],
             [['name', 'source'], 'string', 'max' => 255]
         ];
@@ -60,6 +60,7 @@ class AuctionRound extends \yii\db\ActiveRecord
             'photo' => 'Photo',
             'source' => '提供方',
             'sort'=>'排序',
+            'seller_fee'=>'买家佣金(%)',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];

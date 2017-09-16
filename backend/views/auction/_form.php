@@ -20,9 +20,7 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
     <?= $form->field($model, 'name')->textInput(['maxlength' => 256]) ?>
   </div>  
    <div class="col-md-6">
-     <?= $form->field($model, 'cateid')->dropDownList(ArrayHelper::map($cate, 'cateid', 'name')) ?>
     <?= $form->field($model, 'roundid')->dropDownList(ArrayHelper::map($round, 'id', 'name'),['prompt'=>'请选择']) ?>
-    
      <?= $form->field($model, 'start_time')->widget(DateTimePicker::className(),[
         'options' => ['placeholder' => '请选择时间'],
         'pluginOptions' => [
@@ -46,10 +44,9 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
 
     <?= $form->field($model, 'start_price')->textInput() ?>
 
-    <?= $form->field($model, 'delta_price')->textInput() ?>
+    <?= $form->field($model, 'eval_price')->textInput() ?>
 
-    <?= $form->field($model, 'lowest_deal_price')->textInput() ?>
-        <?= $form->field($model, 'fixed_price')->textInput() ?>
+    <?= $form->field($model, 'reverse_price')->textInput() ?>
         <?= $form->field($model, 'sort')->textInput() ?>
     </div>
    <div class="col-md-12">

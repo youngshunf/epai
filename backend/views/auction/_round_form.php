@@ -18,6 +18,7 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
     <?php $form = ActiveForm::begin(['id'=>'round-form','options' => ['enctype' => 'multipart/form-data','onsubmit'=>'return check()']]); ?>
   
     <?= $form->field($model, 'name')->textInput(['maxlength' => 255]) ?>
+     <?= $form->field($model, 'seller_fee')->textInput(['maxlength' => 255]) ?>
      <?= $form->field($model, 'source')->textInput(['maxlength' => 255])->label('提供方(非必填)') ?>
      <?= $form->field($model, 'sort')->textInput(['maxlength' => 10])->label('排序(越大越靠前)') ?>
       <?= $form->field($model, 'start_time')->widget(DateTimePicker::className(),[

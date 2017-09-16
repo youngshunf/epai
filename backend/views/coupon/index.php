@@ -17,8 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('新增优惠券', ['create'], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('注册优惠设置', ['register-coupon'], ['class' => 'btn btn-info']) ?>
+        <?= Html::a('发放优惠券', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -29,17 +28,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'coupon_code',
             'amount',
             ['attribute'=>'status',
-              'filter'=>['0'=>'未发放','1'=>'未使用','2'=>'已使用','99'=>'已过期'],
+              'filter'=>['1'=>'未使用','2'=>'已使用','99'=>'已过期'],
             'value'=>function ($model){
                 return CommonUtil::getDescByValue('coupon', 'status', $model->status);
             }
             ],
-            ['attribute'=>'type',
-                'filter'=>['1'=>'注册优惠','2'=>'系统发放'],
-            'value'=>function ($model){
-            return CommonUtil::getDescByValue('coupon', 'type', $model->type);
-            }
-            ],
+//             ['attribute'=>'type',
+//                 'filter'=>['1'=>'注册优惠','2'=>'系统发放'],
+//             'value'=>function ($model){
+//             return CommonUtil::getDescByValue('coupon', 'type', $model->type);
+//             }
+//             ],
              ['attribute'=>'end_time',
                 'format'=>['date','php:Y-m-d H:i:s']
              ],

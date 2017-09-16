@@ -43,10 +43,10 @@ class AuctionGoods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['start_price', 'delta_price','lowest_deal_price','name','cateid','start_time','end_time'], 'required'],
+            [['name','start_time','end_time'], 'required'],
             [['cateid','roundid'], 'integer'],
-            [['desc'], 'string'],
-            [['start_price', 'delta_price', 'lowest_deal_price', 'current_price', 'deal_price','fixed_price','sort'], 'number'],
+            [['desc','eval_price'], 'string'],
+            [['start_price', 'delta_price', 'lowest_deal_price', 'current_price', 'deal_price','fixed_price','sort','reverse_price'], 'number'],
             [['goods_guid', 'deal_user'], 'string', 'max' => 48],
             [['name'], 'string', 'max' => 256]
         ];
@@ -76,9 +76,11 @@ class AuctionGoods extends \yii\db\ActiveRecord
             'fixed_price'=>'一口价',
             'start_time' => '起拍时间',
             'end_time' => '结束时间',
-            'created_at' => 'Created At',
+            'reverse_price'=>'保留价',
+            'eval_price'=>'小火估价',
+            'created_at' => '创建时间',
             'updated_at' => '更新时间',
-            'sort'=>'排序(数字越大越靠前)'
+            'sort'=>'拍品序号'
         ];
     }
     

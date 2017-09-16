@@ -19,8 +19,10 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
 <div class="row">
     <?= ListView::widget([
             'dataProvider'=>$dataProvider,
+            'itemOptions' => ['class' => 'item'],
             'itemView'=>'_item',            
-            'layout'=>"{items}\n{pager}"
+            'layout'=>"{items}\n{pager}",
+          'pager' => ['class' => \kop\y2sp\ScrollPager::className()]
       ])?>
 
 </div>
@@ -29,7 +31,7 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
 wx.ready(function () {  
     //分享到朋友圈  
     wx.onMenuShareTimeline({  
-        title: <?= $this->title?>, // 分享标题  
+        title: "<?= $this->title?>", // 分享标题  
         link:window.location.href,  
         imgUrl: "{pigcms:$res['pic']}", // 分享图标  
         success: function () {  
@@ -43,8 +45,8 @@ wx.ready(function () {
 
     //分享给朋友  
     wx.onMenuShareAppMessage({  
-        title: <?= $this->title?>, // 分享标题  
-        desc: <?= $description ?>,  
+        title: "<?= $this->title?>", // 分享标题  
+        desc: "<?= $description ?>",  
         link:window.location.href,  
         imgUrl: "{pigcms:$res['pic']}", // 分享图标  
         trigger: function (res) {  

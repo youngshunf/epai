@@ -39,7 +39,7 @@ class Coupon extends \yii\db\ActiveRecord
             [['amount', 'min_amount','end_time'], 'required'],
             [['amount', 'min_amount'], 'number'],
             [['status', 'type', 'created_at', 'updated_at'], 'integer'],
-            [['coupon_code'], 'string', 'max' => 32],
+            [['coupon_code','mobile'], 'string', 'max' => 32],
             [['created_user', 'user_guid', 'remark'], 'string', 'max' => 255]
         ];
     }
@@ -60,6 +60,7 @@ class Coupon extends \yii\db\ActiveRecord
             'created_user' => '发放用户',
             'user_guid' => 'User Guid',
             'remark' => '备注',
+            'mobile'=>'手机号',    
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
         ];

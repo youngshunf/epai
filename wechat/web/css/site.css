@@ -900,16 +900,16 @@ p.order-status-title{
 	margin-top:15px;
 }
 .red-sm{
-	color:red;
-	font-size: 16px;
+	color:red !important;
+	font-size: 16px !important;
 }
 .red-normal{
 	color:red;
 }
 .red {
-  color: red;
-  font-size: 20px;
-  font-weight: bold;
+  color: red !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
 }
 .comment span{
 	font-size:35px;
@@ -1018,3 +1018,9 @@ p.order-status-title{
 	color:grey;
 	font-size:13px;
 }
+.auction-alert{
+	    border: 1px solid red;
+    padding: 10px;
+    box-shadow: 2px 2px 1px red;
+}
+

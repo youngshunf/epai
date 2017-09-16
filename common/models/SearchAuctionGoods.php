@@ -44,7 +44,7 @@ class SearchAuctionGoods extends AuctionGoods
      */
     public function search($params)
     {
-        $query = AuctionGoods::find()->orderBy('sort desc,created_at asc');
+        $query = AuctionGoods::find()->orderBy('sort asc,created_at asc');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

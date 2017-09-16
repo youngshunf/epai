@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use common\models\CommonUtil;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\News */
@@ -37,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'desc',
             'source',
+            'seller_fee',
             ['attribute'=>'start_time','value'=>CommonUtil::fomatTime($model->start_time)],
             ['attribute'=>'end_time','value'=>CommonUtil::fomatTime($model->end_time)],
            ['attribute'=>'创建时间','value'=>CommonUtil::fomatTime($model->created_at)],
@@ -46,7 +48,10 @@ $this->params['breadcrumbs'][] = $this->title;
  </div>
  
   <div class="col-md-12">
+  
  <h5>专场拍品</h5>
+ 
+ <p><a class="btn btn-success"  href="<?= Url::to(['create-goods','roundid'=>$model->id])?>">发布拍品</a></p>
      <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -58,10 +63,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn','header'=>'序号'],
          
             'name',
-        
+            'sort',
              'start_price',
-            'delta_price',
-             'lowest_deal_price',
+            'reverse_price',
+             'eval_price',
              'current_price',
             // 'count_auction',
             // 'count_view',

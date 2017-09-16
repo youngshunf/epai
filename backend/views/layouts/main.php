@@ -82,11 +82,11 @@ FlatlabAsset::register($this);
 				    'url' => ['/order/index'],
 				    'active'=>yii::$app->controller->id=='order'
 				];
-// 				$menuItems[] = [
-// 				    'label' => '优惠券管理',
-// 				    'url' => ['/coupon/index'],
-// 				    'active'=>yii::$app->controller->id=='coupon'
-// 				];
+				$menuItems[] = [
+				    'label' => '优惠券管理',
+				    'url' => ['/coupon/index'],
+				    'active'=>yii::$app->controller->id=='coupon'
+				];
                 $menuItems[] = [
                     'label' => '注销 (' . yii::$app->user->identity->username. ')',
                     'url' => ['/site/logout'],

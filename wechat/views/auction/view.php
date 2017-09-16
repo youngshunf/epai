@@ -13,6 +13,7 @@ use common\models\Address;
 /* @var $model common\models\AuctionGoods */
 
 $this->title = $model->name;
+$leftTime=(time() - $model->end_time);
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 ?>
 
@@ -20,12 +21,21 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 <a href="#">
 <img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo?>" class="img-responsive">
 </a>
-    <div class="row">
+    <div class="row" id="refreshContainer">
   
   <div class="col-md-6">
   <div class="panel-white">
+  <div class="<?php if(  $leftTime>=0 && $leftTime<=1 ) echo 'auction-alert'?>">
     <h5><?=$model->name ?></h5>
  
+ <?php
+ if($model->reverse_price!=0.00){
+   if($model->current_price<$model->reverse_price){?>
+		<p class="red-sm center">未达到保留价</p>
+	<?php }else{?>
+		<p class="red-sm center">拍品已达到保留价</p>
+	<?php }}?>
+
     <?php 
     $now=time();
     if($now>=$model->start_time&&$now<=$model->end_time){?>
@@ -50,7 +60,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <table class="table table-striped">
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>当前加价幅度:<span class="red-sm">￥<?= $delta_price?></span></td>               
+                 <td>当前加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
+                 <?php if($model->reverse_price!=0.00){?>
+                 <span class="icon-money"></span>
+                 <?php }?>
+                 </td>               
                  </tr>                
                  <tr>
                  <td>围观: <?= $model->count_view?></span></td>
@@ -62,6 +76,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                    <tr>
                  <td colspan="2"> <span>结束时间:<i class="green"><?= CommonUtil::fomatHours($model->end_time)?></i></span></td>
                  </tr>
+                 <?php if(!empty($model->eval_price) && $model->eval_price!=0.00){?>
+                     <tr>
+                 <td colspan='2'><span>小火估价:<i class="red-sm"> ￥<?= $model->eval_price?></i></span></td>
+                 </tr>
+                 <?php }?>
                  </table>
                  
                  </div>
@@ -70,6 +89,9 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 					<span class="red">您已被禁止参与拍卖,请及时购买已经成交的拍品.</span>
 					<?php }else{?>
 					<a  class="btn btn-lg btn-danger  bid-btn" >出价</a>
+					<?php if($model->current_price<$model->reverse_price){?>
+					<p class="red-sm">该拍品有保留价</p>
+					<?php }?>
 					<?php }?>
 				 </div>
 				
@@ -92,7 +114,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span></td>                
+                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                  <?php if($model->reverse_price!=0.00){?>
+                 <span class="icon-money"></span>
+                 <?php }?>
+                 </td>                
                  </tr>
                  
                  <tr>
@@ -107,40 +133,16 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <td colspan="2"> <span>结束时间:<i class="green"><?= CommonUtil::fomatHours($model->end_time)?></i></span></td>
                  </tr>
                  
-                   <?php if(!empty($model->fixed_price)){?>
+                   <?php if(!empty($model->eval_price) && $model->eval_price!=0.00){?>
                      <tr>
-                 <td colspan='2'><span>一口价:<i class="red"> ￥<?= $model->fixed_price?></i></span></td>
+                 <td colspan='2'><span>小火估价:<i class="red-sm"> ￥<?= $model->eval_price?></i></span></td>
                  </tr>
-                 
                  <?php }?>
                  
                  </table>
                  
                  </div>
-                
-                  <div class="center">
-                 
-					 &nbsp;
-						 <?php if(!empty($model->fixed_price)&&$model->status!=3){?>
-						 
-						  <?php if(!yii::$app->user->isGuest){?>
-					   <ul class="list-group">
-                            <?php $address=Address::findOne(['user_guid'=>yii::$app->user->identity->user_guid,'is_default'=>1]);
-                                if(!empty($address)){?>
-                           <li class="list-group-item">收货地址:
-                           <?= $address->province?>   <?= $address->city?>   <?= $address->district?>   <?= $address->address?>   <?= $address->company?>   <?= $address->name?>   <?= $address->phone?>
-                            
-                           </li>
-                           <?php }?>
-                           <li class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</li>
-                           </ul>
-                           <?php }?>
-                           
-					 <?= Html::a('一口价购买',['auction/fixed-buy','goods_guid'=>$model->goods_guid],['class'=>'btn btn-danger','data-confirm'=>'您确定要一口价购买此拍品?'])?>
-					<?php }elseif($model->status==3){?>
-					<span class="btn btn-default">已售出</span>
-					<?php }?>
-				 </div>
+                  
 				 <div class="clear"></div>
                  </div>
     <?php }else if( $now>$model->end_time ){?>
@@ -152,12 +154,16 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 					  <a class="pull-right btn btn-danger" href="<?= Url::to(['auction/goodslove-cancel','goodsid'=>$model->id])?>" > 已收藏</a>
 					<?php }?>
                   </p>
-                <p class="red">已结束</p>
+                <p class="red"><?= CommonUtil::getDescByValue('auction_goods','status',$model->status)?></p>
                    <div class="auction-info">
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span></td>
+                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                  <?php if($model->reverse_price!=0.00){?>
+                 <span class="icon-money"></span>
+                 <?php }?>
+                 </td>
                  
                  </tr>
                  
@@ -172,7 +178,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <tr>
                  <td colspan="2"> <span>结束时间:<i class="green"><?= CommonUtil::fomatHours($model->end_time)?></i></span></td>
                  </tr>
-                 
+                 <?php if(!empty($model->eval_price) && $model->eval_price!=0.00){?>
+                     <tr>
+                 <td colspan='2'><span>小火估价:<i class="red-sm"> ￥<?= $model->eval_price?></i></span></td>
+                 </tr>
+                 <?php }?>
                  </table>
                  <p class="center">
                  
@@ -182,14 +192,8 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
    
     <?php }?>
     
-    <?php if(!yii::$app->user->isGuest){
-    if(yii::$app->user->identity->user_guid==$model->deal_user&&$model->status==2){
-        ?>
-     <div class="center">
-     <a class="btn btn-danger" href="<?= Url::to(['buy-auction','id'=>$model->id])?>">立即购买</a>
+   
     </div>
-    <?php } }?>
-    
      <p class="center">
                  <a href="<?= Url::to(['site/auction-rules'])?>">拍卖规则</a>
        </p>
@@ -246,14 +250,16 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     
     </div>
     </div>
-     <div class="col-lg-12">
+   
+</div>
+<div class="row">
+  <div class="col-lg-12">
      <div class="panel-white">
    <h5>商品介绍</h5>
   <?= $model->desc?>
   </div>
   </div>
 </div>
-
 </div>
 
 
@@ -280,17 +286,20 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                 </p>
             </div>
          <?php }else{?>
-            	<form action="<?= Url::to(['submit-bid'])?>" method="post" onsubmit="return check()">
+            	<form action="<?= Url::to(['submit-bid'])?>" id="bid-form" method="post" onsubmit="return check()">
             	<p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
             	<p>当前加价幅度:<span class="red">￥<?= $delta_price?></span></p>
             	<div class="form-group required" >
             	<label class="label-control">竞拍价格:</label>
-            	<input type="text" name="bid-price" id="bid-price" class="form-control">
+            	<input type="text" name="bid-price" id="bid-price" class="form-control" value="<?= $model->current_price+$delta_price?>">
             	<span class="red-sm hide">*竞拍价格不能低于当前价格,且为加价幅度的整数倍</span>
+            	<?php if($model->current_price<$model->reverse_price){?>
+					<p class="red-sm center">该拍品有保留价</p>
+					<?php }?>
             	</div>
             	<input type="hidden" name="goods-guid"  value="<?= $model->goods_guid?>">
              <div class="form-group center">
-            	<button type="submit" class="btn btn-success ">提交</button>
+            	<button type="button" class="btn btn-success " id="bidSubmit">提交</button>
             	</div>
             	</form>
             	<?php }?>
@@ -346,6 +355,34 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
          <div class="modal-footer">
             <button type="button" class="btn btn-default"  id="modal-close"
                data-dismiss="modal">关闭
+            </button>
+         
+         </div>
+      </div><!-- /.modal-content -->
+</div>
+</div><!-- /.modal -->
+   
+<div class="modal fade" id="confirmBidModal" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title" id="myModalLabel">
+               提示
+            </h4>
+         </div>
+         <div class="modal-body" style="min-height: 350px">
+			<p>请确认您的出价<span class="red">￥<span id="bid-price-final" ></span> </span>,您的出价具有法律效力</p>          
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default"  id="modal-close"
+               data-dismiss="modal">取消
+            </button>
+            <button type="button" class="btn btn-success"  id="final-submit"
+               >确定
             </button>
          
          </div>
@@ -488,36 +525,62 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 
 <script type="text/javascript">
 
-setInterval(function(){
-	location.reload();
-},12000);
+function getFragment(){
+	$.ajax({
+      url:"view-fragment",
+      method:'get',
+      data:{
+          id:'<?= $model->id?>'
+      },
+      success:function(rs){
+		$('#refreshContainer').html(rs);
+		console.log('refresh');
+		countDown();
+      }
+	})
+}
 
+setInterval(function(){
+	getFragment();
+},10000);
+
+function countDown(){
+	 $(".item-countdown").each(function(){
+	   	   var that=$(this);
+	        var countTime=$(this).attr('data-time');
+	        $(this).downCount({
+	    		date: countTime,
+	    		offset: +10
+	    	}, function () {
+	    	//	alert('倒计时结束!');
+	    		that.find('.bid-btn').removeClass('btn-danger');
+	        	that.find('.bid-btn').html('已结束');
+	        	
+	        	that.find('.prev-btn').removeClass('btn-success');
+	        	that.find('.prev-btn').addClass('btn-danger');
+	        	that.find('.prev-btn').html('出价');
+	    	});
+	    });  
+}
 $(document).ready(function(){
-    var that=$(this);
-    $(".item-countdown").each(function(){
-        var countTime=$(this).attr('data-time');
-        $(this).downCount({
-    		date: countTime,
-    		offset: +10
-    	}, function () {
-    	//	alert('倒计时结束!');
-    		that.find('.bid-btn').removeClass('btn-danger');
-        	that.find('.bid-btn').html('已结束');
-        	
-        	that.find('.prev-btn').removeClass('btn-success');
-        	that.find('.prev-btn').addClass('btn-danger');
-        	that.find('.prev-btn').html('出价');
-    	});
-    });    	
-    
+	countDown();
+	$('video').parent().parent().css('background','#000');
 });
 
-$(".bid-btn").click(function(){
+$(document).on("click", "#bidSubmit",function(){
+	var bidPrice=$('#bid-price').val();
+	$('#bid-price-final').html(bidPrice);
+    $("#confirmBidModal").modal("show");
+});
+$(document).on("click",".bid-btn",function(){
     $("#submit-bid").modal("show");
 });
 
-$("#newAddress").click(function(){
+$(document).on("click", "#newAddress",function(){
     $("#AddressModal").modal("show");
+});
+$(document).on("click", "#final-submit",function(){
+    $('#bid-form').submit();
 });
 
 $(".agent-btn").click(function(){

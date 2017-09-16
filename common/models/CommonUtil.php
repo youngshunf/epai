@@ -433,13 +433,19 @@ use yii\db\Exception;
          foreach ($auctionGoods as $k=>$v){
              $auctionRec=AuctionBidRec::find()->andWhere(['goods_guid'=>$v['goods_guid'],'is_leading'=>1])->one();
              if(empty($auctionRec)){
-                 AuctionGoods::updateAll(['status'=>99],['goods_guid'=>$v['goods_guid']]);
+                 AuctionGoods::updateAll(['status'=>4],['goods_guid'=>$v['goods_guid']]);
              }else{
+                 if($v->reverse_price!=0.00 && $v->current_price<$v->reverse_price){
+                     AuctionGoods::updateAll(['status'=>5],['goods_guid'=>$v['goods_guid']]);
+                     continue;
+                 }
                  AuctionGoods::updateAll(['status'=>2,'deal_user'=>$auctionRec->user_guid,'deal_price'=>$v['current_price']],['goods_guid'=>$v['goods_guid']]);
                  $auctionRec->is_deal=1;
                  if(!$auctionRec->save()) throw new Exception('更新拍卖纪录失败!');
                  $order=Order::find()->andWhere(['user_guid'=>$auctionRec->user_guid,'biz_guid'=>$v->goods_guid])->one();
                  if(empty($order)){
+                 
+                 
                  $order=new Order();
                  $order->user_guid=$auctionRec->user_guid;
                  $order->order_guid=CommonUtil::createUuid();
@@ -448,6 +454,14 @@ use yii\db\Exception;
                  $order->goods_name=$v->name;
                  $order->total_amount=$v['current_price'];
                  $order->amount=$v['current_price'];
+                 $round=AuctionRound::findOne(['id'=>$v['roundid']]);
+                 if(!empty($round)){
+                     if($round->seller_fee>0){
+                         $fee=round($order->total_amount*$round->seller_fee,2);
+                         $order->seller_fee=$fee;//卖家佣金
+                         $order->amount +=$fee;
+                     }
+                 }
                  $address=Address::findOne(['user_guid'=>$auctionRec->user_guid,'is_default'=>1]);
                  if(!empty($address)){
                      $order->address_id=$address->id;
