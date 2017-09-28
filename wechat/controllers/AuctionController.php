@@ -585,6 +585,7 @@ class AuctionController extends Controller
         $goods_guid=$_POST['goods-guid'];
         $price=$_POST['bid-price'];
         $auctionGoods=AuctionGoods::findOne(['goods_guid'=>$goods_guid]);
+        $lastLeadingUser=$auctionGoods->leading_user;
         $auctionTimes=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->count();
         $now=time();
         if($auctionGoods->leading_user==$user_guid && ($auctionGoods->current_price>$auctionGoods->reverse_price)){
@@ -654,7 +655,9 @@ class AuctionController extends Controller
         if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error"); 
         
         $transaction->commit();
-        $this->SendTemplateMessage($leading_user, $auctionGoods->id);
+        if($user_guid != $leading_user){
+            $this->SendTemplateMessage($leading_user, $auctionGoods->id);
+        }
         }catch (Exception $e){
             $transaction->rollBack();
             yii::$app->getSession()->setFlash('error',"出价失败,请稍候重试!");

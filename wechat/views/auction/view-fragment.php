@@ -6,7 +6,7 @@ use yii\helpers\Url;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Html;
-$leftTime=(time() - $model->end_time);
+$leftTime=intval( $model->end_time - time());
 
 /* @var $this yii\web\View */
 /* @var $model common\models\AuctionGoods */
@@ -17,8 +17,8 @@ $leftTime=(time() - $model->end_time);
   
   <div class="col-md-6">
   <div class="panel-white">
-  <div class="<?php if(  $leftTime>=0 && $leftTime<=1 ) echo 'auction-alert'?>">
-    <h5><?=$model->name ?></h5>
+  <div class="<?php if(  $leftTime>=0 && $leftTime <=60 ) echo 'auction-alert'?>">
+    <h5><?=$model->name ?>  </h5>
  	 <?php
  if($model->reverse_price!=0.00){
    if($model->current_price<$model->reverse_price){?>
@@ -239,4 +239,55 @@ $leftTime=(time() - $model->end_time);
     
     </div>
     </div>
+    
+    	     <!-- 出价 -->
+<div class="modal fade" id="submit-bid" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title" id="myModalLabel">
+               出价
+            </h4>
+         </div>
+         <div class="modal-body">
+         <?php if(yii::$app->user->isGuest){?>
+            <div class="form-group center">
+                <p>您还未登录,请先
+                <a class="btn btn-success" href="<?= Url::to(['site/login'])?>">登录</a>
+                <a class="btn btn-primary" href="<?= Url::to(['site/register'])?>">注册</a>
+                </p>
+            </div>
+         <?php }else{?>
+            	<form action="<?= Url::to(['submit-bid'])?>" id="bid-form" method="post" onsubmit="return check()">
+            	<p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
+            	<p>当前加价幅度:<span class="red">￥<?= $delta_price?></span></p>
+            	<div class="form-group required" >
+            	<label class="label-control">竞拍价格:</label>
+            	<input type="text" name="bid-price" id="bid-price" class="form-control" value="<?= $model->current_price+$delta_price?>">
+            	<span class="red-sm hide">*竞拍价格不能低于当前价格,且为加价幅度的整数倍</span>
+            	<?php if($model->current_price<$model->reverse_price){?>
+					<p class="red-sm center">该拍品有保留价</p>
+					<?php }?>
+            	</div>
+            	<input type="hidden" name="goods-guid"  value="<?= $model->goods_guid?>">
+             <div class="form-group center">
+            	<button type="button" class="btn btn-success " id="bidSubmit">提交</button>
+            	</div>
+            	</form>
+            	<?php }?>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default"  id="modal-close"
+               data-dismiss="modal">关闭
+            </button>
+         
+         </div>
+      </div><!-- /.modal-content -->
+</div>
+</div><!-- /.modal -->
   

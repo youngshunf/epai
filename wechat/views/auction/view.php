@@ -13,7 +13,7 @@ use common\models\Address;
 /* @var $model common\models\AuctionGoods */
 
 $this->title = $model->name;
-$leftTime=(time() - $model->end_time);
+$leftTime=intval( $model->end_time -time() );
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 ?>
 
@@ -25,9 +25,8 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
   
   <div class="col-md-6">
   <div class="panel-white">
-  <div class="<?php if(  $leftTime>=0 && $leftTime<=1 ) echo 'auction-alert'?>">
-    <h5><?=$model->name ?></h5>
- 
+  <div class="<?php if(  $leftTime>=0 && $leftTime<=60 ) echo 'auction-alert'?>">
+    <h5><?=$model->name ?> </h5>
  <?php
  if($model->reverse_price!=0.00){
    if($model->current_price<$model->reverse_price){?>
@@ -40,7 +39,10 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     $now=time();
     if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
-       
+       <?php if($model->reverse_price!=0.00){?>
+                 <span class="icon-money"></span>
+                 <?php }?>
+                 
        <?php if(!$hasLove){?>
 		<a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
 		<?php }else{?>
@@ -61,9 +63,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
                  <td>当前加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
-                 <?php if($model->reverse_price!=0.00){?>
-                 <span class="icon-money"></span>
-                 <?php }?>
+                 
                  </td>               
                  </tr>                
                  <tr>
@@ -115,9 +115,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
                  <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
-                  <?php if($model->reverse_price!=0.00){?>
-                 <span class="icon-money"></span>
-                 <?php }?>
+                 
                  </td>                
                  </tr>
                  
@@ -147,7 +145,9 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  </div>
     <?php }else if( $now>$model->end_time ){?>
                   <p>成交价格:<span class="red">￥<?= $model->current_price?></span>
-                  
+                  	<?php if($model->reverse_price!=0.00){?>
+                 <span class="icon-money"></span>
+                 <?php }?>
                  <?php if(!$hasLove){?>
 					 <a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
 					<?php }else{?>
@@ -160,9 +160,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
                  <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
-                  <?php if($model->reverse_price!=0.00){?>
-                 <span class="icon-money"></span>
-                 <?php }?>
+                  
                  </td>
                  
                  </tr>
@@ -251,19 +249,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     </div>
     </div>
    
-</div>
-<div class="row">
-  <div class="col-lg-12">
-     <div class="panel-white">
-   <h5>商品介绍</h5>
-  <?= $model->desc?>
-  </div>
-  </div>
-</div>
-</div>
-
-
-	     <!-- 出价 -->
+   	     <!-- 出价 -->
 <div class="modal fade" id="submit-bid" tabindex="-1" role="dialog" 
    aria-labelledby="myModalLabel" aria-hidden="true">
    <div class="modal-dialog">
@@ -313,6 +299,21 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
       </div><!-- /.modal-content -->
 </div>
 </div><!-- /.modal -->
+   
+   
+</div>
+<div class="row">
+  <div class="col-lg-12">
+     <div class="panel-white">
+   <h5>商品介绍</h5>
+  <?= $model->desc?>
+  </div>
+  </div>
+</div>
+</div>
+
+
+
 
      <!-- 代理出价-->
 <div class="modal fade" id="submit-agent" tabindex="-1" role="dialog" 
