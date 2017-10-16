@@ -39,7 +39,7 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
     
     <div class="wrap">   
   
-        <div class="wrap">
+        <div class="wrap" >
         <div class="main-content">      
          <?= Alert::widget() ?>
         <?= $content ?>
@@ -117,7 +117,7 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
             
     </div>
      <!-- 模态框（Modal） -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" 
+<div class="modal fade" id="myModal" tabindex="2" role="dialog" 
    aria-labelledby="myModalLabel" aria-hidden="true">
    <div class="modal-dialog">
       <div class="modal-content">

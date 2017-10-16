@@ -47,6 +47,24 @@ class ImageUploader{
         
     }
     
+    public static function uploadVideo($name){
+        $photoFile=UploadedFile::getInstanceByName($name);
+        if(empty($photoFile)){
+            return false;
+        }
+        $basePath='../../upload/video/';
+        if(!is_dir($basePath)){
+            mkdir($basePath);
+        }
+        $path=date('Ymd').'/';
+        if(!is_dir($basePath.$path)){
+            mkdir($basePath.$path);
+        }
+        $fileName=date('YmdHis').rand(0000, 9999).'.'.$photoFile->extension;
+        $photoFile->saveAs($basePath.$path.$fileName);
+        return ['path'=>$path,'photo'=>$fileName];
+    }
+    
     public static function uploadHomePhoto($name){
         $photoFile=UploadedFile::getInstanceByName($name);
         if(empty($photoFile)){

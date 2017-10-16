@@ -22,6 +22,7 @@ use common\models\Address;
 use common\models\Siteinfo;
 use common\models\WeChatTemplate;
 use common\models\GoodsLove;
+use yii\helpers\Json;
 
 /**
  * AuctionController implements the CRUD actions for AuctionGoods model.
@@ -262,6 +263,18 @@ class AuctionController extends Controller
     
     }
     
+    public function actionGetRoundlist(){
+        $data=$_GET['data'];
+        $pageIndex=$data['pageIndex'];
+        $pageSize=$data['pageSize'];
+        if(empty($pageSize)){
+            $pageSize=5;
+        }
+        $roundid=$data['roundid'];
+        $roundList=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->orderBy('sort asc,start_time asc')->limit($pageSize)->offset(($pageIndex-1)*$pageSize)->all();
+        return Json::encode($roundList);
+    }
+    
     public function actionGoodsLove($goodsid){
         $user_guid=yii::$app->user->identity->user_guid;
         $goodsLove=new GoodsLove();
@@ -457,13 +470,17 @@ class AuctionController extends Controller
         ]);
     $delta_price=20;
     if($model->current_price>=200&&$model->current_price<500){
+        $delta_price=30;
+    }elseif($model->current_price>=500&&$model->current_price<1000){
         $delta_price=50;
-    }elseif($model->current_price>=500&&$model->current_price<2000){
+    }elseif($model->current_price>=1000&&$model->current_price<2000){
         $delta_price=100;
     }elseif($model->current_price>=2000&&$model->current_price<5000){
-        $delta_price=200;
-    }elseif($model->current_price>=5000){
+        $delta_price=300;
+    }elseif($model->current_price>=5000&&$model->current_price<10000){
         $delta_price=500;
+    }elseif($model->current_price>=10000){
+        $delta_price=1000;
     }
     
     $auctionRule=Siteinfo::findOne(['id'=>4]);
@@ -507,13 +524,17 @@ class AuctionController extends Controller
         ]);
         $delta_price=20;
         if($model->current_price>=200&&$model->current_price<500){
+            $delta_price=30;
+        }elseif($model->current_price>=500&&$model->current_price<1000){
             $delta_price=50;
-        }elseif($model->current_price>=500&&$model->current_price<2000){
+        }elseif($model->current_price>=1000&&$model->current_price<2000){
             $delta_price=100;
         }elseif($model->current_price>=2000&&$model->current_price<5000){
-            $delta_price=200;
-        }elseif($model->current_price>=5000){
+            $delta_price=300;
+        }elseif($model->current_price>=5000&&$model->current_price<10000){
             $delta_price=500;
+        }elseif($model->current_price>=10000){
+            $delta_price=1000;
         }
         
         $auctionRule=Siteinfo::findOne(['id'=>4]);
@@ -609,22 +630,32 @@ class AuctionController extends Controller
         }
         $delta_price=20;
         if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+            $delta_price=30;
+        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<1000){
             $delta_price=50;
-        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+        }elseif ($auctionGoods->current_price>=1000&&$auctionGoods->current_price<2000){
             $delta_price=100;
         }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
-            $delta_price=200;
-        }elseif ($auctionGoods->current_price>=5000){
+            $delta_price=300;
+        }elseif ($auctionGoods->current_price>=5000&&$auctionGoods->current_price<10000){
             $delta_price=500;
+        }elseif($auctionGoods->current_price>=10000){
+            $delta_price=1000;
         }
-        if(($price-$auctionGoods->current_price)%$delta_price!=0){
-            yii::$app->getSession()->setFlash('error',"出价失败,竞拍价格必须为加价幅度的整数倍.");
+        if(($price-$auctionGoods->current_price) < $delta_price){
+            yii::$app->getSession()->setFlash('error',"出价失败,竞拍价格必须大于加价幅度.");
             return $this->redirect(['view','id'=>$auctionGoods->id]);
         }
         
         //开始事务
         $transaction=yii::$app->db->beginTransaction();
-        try{            
+        try{       
+           $maxPrice=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->max('price');
+           if($price<$maxPrice){
+               throw new Exception("您的出价不是最高的"); 
+               yii::$app->getSession()->setFlash('success',"您的出价已被超越,出价无效,请重新出价!");
+               return $this->redirect(yii::$app->request->referrer);
+           }
            AuctionBidRec::updateAll(['is_leading'=>0],['goods_guid'=>$goods_guid]);
             //增加出价记录
         $bidRec=new AuctionBidRec();
@@ -665,7 +696,11 @@ class AuctionController extends Controller
         }
         
         if($auctionGoods->current_price<$auctionGoods->reverse_price && $auctionGoods->reverse_price !=0.00){
-            yii::$app->getSession()->setFlash('success',"您的出价未达到保留价，您可以继续出价!");
+            $msg="您的出价未达到保留价，您可以继续出价!";
+            if($auctionGoods->eval_price!='0.00'){
+                $msg .="<br>小火估价 ￥".$auctionGoods->eval_price;
+            }
+            yii::$app->getSession()->setFlash('success',$msg);
         }elseif($auctionGoods->current_price>$auctionGoods->reverse_price && $auctionGoods->reverse_price !=0.00){
             yii::$app->getSession()->setFlash('success',"出价成功!");
         }else{
@@ -708,15 +743,19 @@ class AuctionController extends Controller
             return false;
         }
         
-        $delta_price=20;
+       $delta_price=20;
         if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+            $delta_price=30;
+        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<1000){
             $delta_price=50;
-        }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+        }elseif ($auctionGoods->current_price>=1000&&$auctionGoods->current_price<2000){
             $delta_price=100;
         }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
-            $delta_price=200;
-        }elseif ($auctionGoods->current_price>=5000){
+            $delta_price=300;
+        }elseif ($auctionGoods->current_price>=5000&&$auctionGoods->current_price<10000){
             $delta_price=500;
+        }elseif($auctionGoods->current_price>=10000){
+            $delta_price=1000;
         }
         
         $secondMaxAgentPrice=AuctionAgentBid::find()->andWhere(" goods_guid='$goods_guid' and is_valid=1 and top_price!=$maxAgentPrice ")->max('top_price');
@@ -896,13 +935,17 @@ class AuctionController extends Controller
                 
                 $delta_price=20;
                 if($auctionGoods->current_price>=200&&$auctionGoods->current_price<500){
+                    $delta_price=30;
+                }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<1000){
                     $delta_price=50;
-                }elseif ($auctionGoods->current_price>=500&&$auctionGoods->current_price<2000){
+                }elseif ($auctionGoods->current_price>=1000&&$auctionGoods->current_price<2000){
                     $delta_price=100;
                 }elseif ($auctionGoods->current_price>=2000&&$auctionGoods->current_price<5000){
-                    $delta_price=200;
-                }elseif ($auctionGoods->current_price>=5000){
+                    $delta_price=300;
+                }elseif ($auctionGoods->current_price>=5000&&$auctionGoods->current_price<10000){
                     $delta_price=500;
+                }elseif($auctionGoods->current_price>=10000){
+                    $delta_price=1000;
                 }
                 //增加出价记录
                 $bidRec=new AuctionBidRec();

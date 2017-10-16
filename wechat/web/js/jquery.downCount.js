@@ -2,13 +2,14 @@
  * downCount: Simple Countdown clock with offset
  * Author: Sonny T. <hi@sonnyt.com>, sonnyt.com
  */
-
+ var intervalCountDowns=[];
 (function ($) {
 
     $.fn.downCount = function (options, callback) {
         var settings = $.extend({
                 date: null,
-                offset: null
+                offset: null,
+                timer:0
             }, options);
 
         // Throw error if date is not set
@@ -54,7 +55,10 @@
             // if difference is negative than it's pass the target date
             if (difference < 0) {
                 // stop timer
-                clearInterval(interval);
+            	if(intervalCountDowns[settings.timer]){
+            	  clearInterval(intervalCountDowns[settings.timer]);
+            	}
+              
 
                 if (callback && typeof callback === 'function') callback();
 
@@ -98,7 +102,7 @@
         };
         
         // start
-        var interval = setInterval(countdown, 1000);
+         intervalCountDowns.push(setInterval(countdown, 1000));
     };
 
 })(jQuery);

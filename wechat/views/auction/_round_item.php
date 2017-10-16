@@ -51,7 +51,7 @@ use common\models\AuctionGoods;
                  </div>
           
           <?php }?>
-                 <br>
+            
 					
 					<?php if(!empty($model->source)){?>
 					<p>拍品提供:  <?=$model->source?></p>

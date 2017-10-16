@@ -1014,13 +1014,24 @@ p.order-status-title{
 .green{
 	color:#090;
 }
+.organe{
+	color:orangered !important;
+	font-size: 14px !important;
+}
 .grey{
 	color:grey;
 	font-size:13px;
 }
 .auction-alert{
-	    border: 1px solid red;
-    padding: 10px;
-    box-shadow: 2px 2px 1px red;
+    border: 5px solid orangered;
+    padding: 5px;
+	animation:twink 2s;
+    animation-iteration-count: infinite;
+}
+body.modal-open{ position: fixed}
+@keyframes twink
+{
+0%   {border-color: white;}
+100% {border-color: orangered;}
 }
 

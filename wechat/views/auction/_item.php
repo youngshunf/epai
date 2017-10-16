@@ -4,11 +4,11 @@ use yii\web\View;
 use yii\widgets\LinkPager;
 use common\models\CommonUtil;
 use yii\helpers\Url;
-
+$leftTime=intval( $model->end_time -time() );
 ?>
 
 <a href="<?= Url::to(['view','id'=>$model['id']])?>">
-        <div class="col-md-3">
+        <div class="col-md-3" >
             <ul class="auction">
 			<li class="pai-item">
 				<a href="<?= Url::to(['view','id'=>$model->id])?>">
@@ -18,7 +18,7 @@ use yii\helpers\Url;
 				$now=time();
 				if($now>=$model->start_time&&$now<=$model->end_time){
 				?>			
-				<div class="pai-content">
+				<div class="pai-content <?php if(  $leftTime>=0 && $leftTime<=60 ) echo 'auction-alert'?>">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right"> 当前价格:<i class="red">￥<?= $model->current_price?></i></span></p>				 
 				 <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->end_time)?>" >
@@ -38,7 +38,7 @@ use yii\helpers\Url;
                     <span class="side-num"><?= $model->count_auction?></span>次出价
 				</div>
 			<?php }elseif ($now<$model->start_time){?>
-			     	<div class="pai-content">
+			     	<div class="pai-content <?php if(  $leftTime>=0 && $leftTime<=60 ) echo 'auction-alert'?>">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right">加价幅度:<i class="red">￥<?= $model->delta_price?></i></span></p>				 
 				 <div class="item-countdown" data-time="<?= date("m/d/Y H:i:s",$model->start_time)?>">
@@ -54,7 +54,7 @@ use yii\helpers\Url;
                  </div>								 
 				</div>			
 			<?php }elseif ($now>$model->end_time){?>
-				<div class="pai-content">
+				<div class="pai-content <?php if(  $leftTime>=0 && $leftTime<=60 ) echo 'auction-alert'?>">
 				 <h3 class="ellipsis"><?= $model->name?></h3>
 				 <p>起拍价格:<i class="red-sm">￥<?= $model->start_price?></i> <span class="pull-right"> 当前价格:<i class="red">￥<?= $model->current_price?></i></span></p>				 
 				 &nbsp;<span class="red-sm">

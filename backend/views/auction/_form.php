@@ -47,9 +47,13 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
     <?= $form->field($model, 'eval_price')->textInput() ?>
 
     <?= $form->field($model, 'reverse_price')->textInput() ?>
+    
+    
         <?= $form->field($model, 'sort')->textInput() ?>
     </div>
    <div class="col-md-12">
+    <?= $form->field($model, 'poster_url')->textInput() ?>
+    <?= $form->field($model, 'video_url')->textInput() ?>
         <div class="form-group">
          <label>内容</label>
           <?= Ueditor::widget(['id'=>'goods-desc',
@@ -69,8 +73,25 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
             <img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'thumb/'.$model->photo?>" class="img-responsive">
         <?php }?>
         </div>
-       <input type="file" name="photo"  class="hide"  id="photo">
+       <input type="file" name="photo"  class="hide photo-upload"  id="photo">
        </div>
+       
+       <div class="form-group">
+        <label class="control-label"> 视频封面(上传视频封面图片覆盖封面URL)</label>
+        <div class="img-container">
+        <?php if(empty($model->poster_url)){?>
+                <div class="uploadify-button"> 
+                </div>
+        <?php }else{?>
+            <img alt="封面图片" src="<?= $model->poster_url ?>" class="img-responsive">
+        <?php }?>
+        </div>
+       <input type="file" name="poster"  class="hide photo-upload"  id="photo">
+       </div>
+       <div class="form-group">
+        <label class="control-label"> 上传视频(只支持MP4格式,上传视频覆盖视频URL)</label>
+        <input type="file" name='video' >
+        </div>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? '提交' : '确定', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
@@ -84,12 +105,13 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
 
 
 $('.img-container').click(function(){
-    $('#photo').click();
+	$(this).parent().find('input[type=file]').click();
 })
 
-document.getElementById('photo').addEventListener('change', function () {
-    var that = this;
-    lrz(that.files[0], {
+$('.photo-upload').change(function(){
+	var that = $(this);
+	
+    lrz(that.get(0).files[0], {
         width: 300
     })
         .then(function (rst) {
@@ -97,11 +119,29 @@ document.getElementById('photo').addEventListener('change', function () {
             img.className='img-responsive';
             img.src = rst.base64;    
             img.onload = function () {
-           	 $('.img-container').html(img);
+            	that.parent().find('.img-container').html(img);
             };                 
             return rst;
         });
+
 });
+
+
+// document.getElementById('photo').addEventListener('change', function () {
+//     var that = this;
+//     lrz(that.files[0], {
+//         width: 300
+//     })
+//         .then(function (rst) {
+//             var img        = new Image();            
+//             img.className='img-responsive';
+//             img.src = rst.base64;    
+//             img.onload = function () {
+//            	 $('.img-container').html(img);
+//             };                 
+//             return rst;
+//         });
+// });
 
 function check(){
 

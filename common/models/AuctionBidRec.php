@@ -44,7 +44,7 @@ class AuctionBidRec extends \yii\db\ActiveRecord
             'id' => 'ID',
             'goods_guid' => '商品guid',
             'user_guid' => 'User Guid',
-            'amount' => '出价',
+            'price' => '出价',
             'created_at' => '出价时间',
         ];
     }

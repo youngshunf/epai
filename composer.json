@@ -11,7 +11,9 @@
 		"2amigos/yii2-qrcode-helper" : "*",
 		"kartik-v/yii2-widgets" : "=v3.4.0",
 		"yiisoft/yii2-imagine" : "*",
-		"kop/yii2-scroll-pager" : "dev-master"
+		"kop/yii2-scroll-pager" : "dev-master",
+		 "nirvana-msu/yii2-infinite-scroll": "1.0.*@dev",
+		"darkcs/yii2-infinite-scroll": "*"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-codeception" : "*",

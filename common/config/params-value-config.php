@@ -25,7 +25,7 @@ return [
     'auction_goods.status.0'=>'预展',
     'auction_goods.status.1'=>'拍卖中',
     'auction_goods.status.2'=>'成交',
-    'auction_goods.status.3'=>'已售出',
+    'auction_goods.status.3'=>'已成交',
     'auction_goods.status.4'=>'流拍',
     'auction_goods.status.5'=>'未达到保留价流拍',
     'auction_goods.status.99'=>'已结束',

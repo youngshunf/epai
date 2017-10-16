@@ -197,9 +197,20 @@ class AuctionController extends Controller
     public function actionViewGoods($id)
     {
         $this->layout="@backend/views/layouts/auction_layout.php";
-        return $this->render('view-goods', [
-            'model' => $this->findModel($id),
+        $model=$this->findModel($id);
+        $dataProvider=new ActiveDataProvider([
+            'query'=>AuctionBidRec::find()->andWhere(['goods_guid'=>$model->goods_guid])->orderBy('price desc')
         ]);
+        return $this->render('view-goods', [
+            'model' => $model,
+            'dataProvider'=>$dataProvider
+        ]);
+    }
+    
+    public function actionDeleteRec($id){
+        AuctionBidRec::findOne($id)->delete();
+        yii::$app->getSession()->setFlash('success','删除成功!');
+        return $this->redirect(yii::$app->request->referrer);
     }
     
     public function actionGoodsGuarantee($id){
@@ -321,6 +332,15 @@ class AuctionController extends Controller
                 $model->path=$photo['path'];
                 $model->photo=$photo['photo'];
             }
+            $photo=ImageUploader::uploadByName('poster');
+            if($photo){
+                $model->poster_url=yii::$app->params['photoUrl'].$photo['path'].$photo['photo'];
+            }
+            $video=ImageUploader::uploadVideo('video');
+            if($video){ 
+                $model->video_url=yii::$app->params['uploadUrl'].'video/'.$video['path'].$video['photo'];
+            }
+            
             $model->current_price=$model->start_price;
             $model->start_time=strtotime($model->start_time);
             $model->end_time=strtotime($model->end_time);
@@ -356,6 +376,14 @@ class AuctionController extends Controller
             if($photo){
                 $model->path=$photo['path'];
                 $model->photo=$photo['photo'];
+            }
+            $photo=ImageUploader::uploadByName('poster');
+            if($photo){
+                $model->poster_url=yii::$app->params['photoUrl'].$photo['path'].$photo['photo'];
+            }
+            $video=ImageUploader::uploadVideo('video');
+            if($video){
+                $model->video_url=yii::$app->params['uploadUrl'].'video/'.$video['path'].$video['photo'];
             }
             $current_price=AuctionBidRec::find()->andWhere(['goods_guid'=>$model->goods_guid])->max('price');
             if(empty($current_price)){

@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use common\models\CommonUtil;
 use yii\helpers\Url;
+use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\AuctionGoods */
@@ -33,6 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
     <div class="col-md-6">
    <img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo?>" class="img-responsive">
+  
+  <div class="center">
+     <video src="<?= $model->video_url?>" poster="<?= $model->poster_url?>" controls height="250px" width="100%" preload style="background:#000;max-width:100%"></video>
+     </div>
   </div>
   <div class="col-md-6">
     
@@ -60,6 +65,41 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
     </div>
      <div class="col-lg-12">
+     <h5>加价记录</h5>
+     <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'pager'=>[
+            'firstPageLabel'=>'首页',
+            'lastPageLabel'=>'尾页'
+        ],
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn','header'=>'序号'],        
+            'user.mobile',
+            'price',
+            ['attribute'=>'状态',
+                'value'=>function ($model){
+                if($model->is_deal==1){
+                    return '成交';
+                }else {
+                    return $model->is_leading==1?'领先':'出局';
+                }
+         }],
+           ['attribute'=>'出价时间','value'=>function ($model){
+               return CommonUtil::fomatTime($model->created_at);
+           }],
+            
+                [	'class' => 'yii\grid\ActionColumn',
+             	'header'=>'操作',
+            	'template'=>'{delete-rec}',
+	             'buttons'=>[
+					'delete-rec'=>function ($url,$model,$key){
+					return  Html::a('删除', $url, ['title' => '删除', 'data-confirm'=>'您确定删除此条出价记录?删除后将不可恢复'] );
+					},
+					
+				]
+           	],
+        ],
+    ]); ?>
    <h5>商品描述</h5>
   <?= $model->desc?>
   </div>

@@ -42,7 +42,23 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
 
 
 <script type="text/javascript">
+window.addEventListener("popstate", function(e) {  //回调函数中实现需要的功能
+    
+	WeixinJSBridge.call('closeWindow');
 
+}, false);  
+
+function pushHistory() {  
+    var state = {  
+        title: "title",  
+        url: "#"  
+    };  
+    window.history.pushState(state, "title", "#");  
+ 
+}  
+
+pushHistory();
+sessionStorage.removeItem('$pageIndex');
     $(".item-countdown").each(function(){
         var that=$(this);
         var countTime=$(this).attr('data-time');
@@ -89,5 +105,5 @@ $description = empty($description)?yii::$app->params['site-desc']:$description;
             }  
         });  
     });  
-
+    
 </script>

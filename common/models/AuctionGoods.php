@@ -45,7 +45,7 @@ class AuctionGoods extends \yii\db\ActiveRecord
         return [
             [['name','start_time','end_time'], 'required'],
             [['cateid','roundid'], 'integer'],
-            [['desc','eval_price'], 'string'],
+            [['desc','eval_price','poster_url','video_url'], 'string'],
             [['start_price', 'delta_price', 'lowest_deal_price', 'current_price', 'deal_price','fixed_price','sort','reverse_price'], 'number'],
             [['goods_guid', 'deal_user'], 'string', 'max' => 48],
             [['name'], 'string', 'max' => 256]
@@ -78,8 +78,11 @@ class AuctionGoods extends \yii\db\ActiveRecord
             'end_time' => '结束时间',
             'reverse_price'=>'保留价',
             'eval_price'=>'小火估价',
+            'poster_url'=>'视频封面URL',
+            'video_url'=>'视频URL',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
+            
             'sort'=>'拍品序号'
         ];
     }
