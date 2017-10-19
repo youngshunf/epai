@@ -456,8 +456,8 @@ use yii\db\Exception;
                  $order->amount=$v['current_price'];
                  $round=AuctionRound::findOne(['id'=>$v['roundid']]);
                  if(!empty($round)){
-                     if($round->seller_fee>0){
-                         $fee=round($order->total_amount*$round->seller_fee,2);
+                     if( $round->seller_fee>0){
+                         $fee=$order->total_amount*($round->seller_fee/100);
                          $order->seller_fee=$fee;//卖家佣金
                          $order->amount +=$fee;
                      }

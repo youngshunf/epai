@@ -256,9 +256,11 @@ class AuctionController extends Controller
             ]
         ]);
      $round=AuctionRound::findOne($id);
+     $picUrl=yii::getAlias('@photo').'/'.$round->path.'mobile/'.$round->photo;
             return $this->render('round-view', [
                 'dataProvider' => $dataProvider,
-                'round'=>$round
+                'round'=>$round,
+                'picUrl'=>$picUrl
                 ]);
     
     }

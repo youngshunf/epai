@@ -18,8 +18,8 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/site.css',
-        'css/auction.css',
+        'css/site.css?2017',
+        'css/auction.css?2017',
         'flatlab/css/bootstrap-reset.css',
         'css/Font-Awesome-3.2.1/css/font-awesome.min.css',
         'css/mui.min.css',
@@ -30,7 +30,7 @@ class AppAsset extends AssetBundle
     ];
     public $js = [    
         'js/common.js',
-        'js/jquery.downCount.js',
+        'js/jquery.downCount.js?2017',
         'js/mui.min.js'
       
     ];

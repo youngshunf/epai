@@ -40,7 +40,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
        <?php if($model->reverse_price!=0.00){?>
-                 <img alt="保留价" src="../img/baoliujia.png" style="width:28px;display: inline-block">
+                 <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block">
                  <?php }?>
                  
        <?php if(!$hasLove){?>
@@ -88,7 +88,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                   <?php if(yii::$app->user->identity->status==0){?>
 					<span class="red">您已被禁止参与拍卖,请及时购买已经成交的拍品.</span>
 					<?php }else{?>
-					<a  class="btn btn-lg btn-danger  bid-btn" >出价</a>
+					<button  class="btn btn-lg btn-danger  bid-btn"  >出价</button>
 					<?php if($model->current_price<$model->reverse_price){?>
 					<p  style="margin-top:15px"><span class="organe">该拍品有保留价</span></p>
 					<?php }?>
@@ -146,7 +146,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     <?php }else if( $now>$model->end_time ){?>
                   <p>成交价格:<span class="red">￥<?= $model->current_price?></span>
                   	<?php if($model->reverse_price!=0.00){?>
-                 <img alt="保留价" src="../img/baoliujia.png" style="width:28px;display: inline-block">
+                 <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block">
                  <?php }?>
                  <?php if(!$hasLove){?>
 					 <a class="pull-right btn btn-warning" href="<?= Url::to(['auction/goods-love','goodsid'=>$model->id])?>">收藏</a> &nbsp;
@@ -190,7 +190,23 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
    
     <?php }?>
     
-   
+    <?php if(!yii::$app->user->isGuest){
+    if(yii::$app->user->identity->user_guid==$model->deal_user&&$model->status==2){
+        ?>
+     <ul class="list-group">
+    <?php $address=Address::findOne(['user_guid'=>yii::$app->user->identity->user_guid,'is_default'=>1]);
+        if(!empty($address)){?>
+   <li class="list-group-item">收货地址:
+   <?= $address->province?>   <?= $address->city?>   <?= $address->district?>   <?= $address->address?>   <?= $address->company?>   <?= $address->name?>   <?= $address->phone?>
+    
+   </li>
+   <?php }?>
+   <li class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</li>
+   </ul>
+   <div class="center">
+     <a class="btn btn-danger" href="<?= Url::to(['buy-auction','id'=>$model->id])?>">立即购买</a>
+    </div>
+    <?php } }?>
     </div>
      <p class="center">
                  <a href="<?= Url::to(['site/auction-rules'])?>">拍卖规则</a>

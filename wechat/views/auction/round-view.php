@@ -73,8 +73,8 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
                         <span class="J_TimeLeft"><i class="days">00</i>天<i class="hours">00</i> 时 <i class="minutes">00</i> 分 <i class="seconds">00</i> 秒</span>
                  </p>
                   <div class="item-button">
-					<a :href="'view?id='+item.id" class="btn btn-default btn-xs">围观({{item.count_view}})</a>
-					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-xs" >出价</a>
+					<a :href="'view?id='+item.id" class="btn btn-default btn-sm">围观({{item.count_view}})</a>
+					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-sm" >出价</a>
 				 </div>
 				 <div class="clear"></div>
                  </div>
@@ -94,8 +94,8 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
                         <span class="J_TimeLeft prev"><i class="days">00</i>天<i class="hours">00</i> 时 <i class="minutes">00</i> 分 <i class="seconds">00</i> 秒</span>
                  </p>
                   <div class="item-button">
-					<a :href="'view?id='+item.id" class="btn btn-default btn-xs">围观({{item.count_view}})</a>  &nbsp;
-					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-xs" >出价</a>
+					<a :href="'view?id='+item.id" class="btn btn-default btn-sm">围观({{item.count_view}})</a>  &nbsp;
+					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-sm" >出价</a>
 				 </div>
 				 <div class="clear"></div>
                  </div>
@@ -116,8 +116,8 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
 				 </span>&nbsp;&nbsp;
 				
                   <div class="item-button">
-					<a :href="'view?id='+item.id" class="btn btn-default btn-xs">围观({{item.count_view}})</a> 
-					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-xs" >出价</a>
+					<a :href="'view?id='+item.id" class="btn btn-default btn-sm">围观({{item.count_view}})</a> 
+					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-sm" >出价</a>
 				 </div>
 				 <div class="clear"></div>
                  </div>
@@ -190,7 +190,7 @@ var app= new Vue({
         var self=this;
         this.time=moment().unix(new Date());
         var lastIndex=sessionStorage.getItem('$pageIndex') || 1;
-        if(!this.first && lastIndex ==this.query.pageIndex && this.query.pageIndex!=1){
+        if(!this.first && lastIndex ==this.query.pageIndex){
         	if(direct=='up' ){
 				  if (self.$refs.scroller)
 					  self.$refs.scroller.finishPullToRefresh();
@@ -215,20 +215,20 @@ var app= new Vue({
 				if(rs && typeof rs=='string'){
                    rs=JSON.parse(rs);
 				}
-			    if(rs.length==0){
+			    if(rs.length==0 ){
 			    	self.query.pageIndex--;
 			    	if(self.query.pageIndex<1){
 			    		self.query.pageIndex=1;
 			    	}
 			    	sessionStorage.setItem('$pageIndex',self.query.pageIndex);
 			    }
-				if((rs.length==0 || (rs.length<self.query.pageSize)) && !self.first){
+				if((rs.length==0 || (rs.length<self.query.pageSize))){
 					self.infiniteCount=2;
 				}
 				 if(self.first){
 						self.first=false;
 			    }
-				if(self.query.pageIndex==1){
+				if(self.query.pageIndex==1 && rs.length !=0){
 					self.list=rs;
 				}else{
 					if(direct=='up'){
@@ -347,7 +347,7 @@ wx.ready(function () {
     wx.onMenuShareTimeline({  
         title: "<?= $this->title?>", // 分享标题  
         link:window.location.href,  
-        imgUrl: "{pigcms:$res['pic']}", // 分享图标  
+        imgUrl: "<?=$picUrl?>", // 分享图标  
         success: function () {  
    // 分享成功执行此回调函数  
 //            alert('success');  
@@ -362,7 +362,7 @@ wx.ready(function () {
         title: "<?= $this->title?>", // 分享标题  
         desc: "<?= $description ?>",  
         link:window.location.href,  
-        imgUrl: "{pigcms:$res['pic']}", // 分享图标  
+        imgUrl: "<?=$picUrl?>", // 分享图标  
         trigger: function (res) {  
             // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回  
         },  

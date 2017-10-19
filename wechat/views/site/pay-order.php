@@ -6,6 +6,7 @@ use common\models\CommonUtil;
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Url;
 use yii\web\View;
+use common\models\Coupon;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\AuctionGoods */
@@ -13,6 +14,7 @@ use yii\web\View;
 $this->title = "订单支付";
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 $hasAddress=empty($order->address)?0:1;
+$coupon=Coupon::findAll(['user_guid'=>$order->user_guid,'status'=>'1']);
 ?>
 
     <div class="panel-white">
@@ -22,13 +24,23 @@ $hasAddress=empty($order->address)?0:1;
                  <p><label>订单编号:</label><span ><?= $order->orderno?></span></p>
                  <p><label>商品金额:</label><span class="red">￥<?= $order->total_amount?></span></p>
                  <?php if($order->seller_fee>0){?>
-                  <p><label>卖家佣金:</label><span class="red">￥<?= $order->seller_fee?></span></p>
+                  <p><label>买家佣金:</label><span class="red">￥<?= $order->seller_fee?></span></p>
                  <?php }?>
                  <p><label>数量:</label><span class="green"><?= $order->number?></span></p>
                  <?php if(!empty($order->address)){?>
                  <p><label>收货地址:</label><span ><?= $order->address?></span></p>
                  <?php }?>
-                 <p><span class="pull-right"><label>实际支付金额:</label><span class="red">￥<?= $order->amount?></span></span></p>
+                 <?php if(count($coupon)>0){?>
+                 <p><label>您有可用优惠券:</label></p>
+                 <ul class="mui-table-view">
+                   <?php foreach ($coupon as $v){?>
+                   <li class="mui-table-view-cell mui-radio mui-left">
+						<input name="coupon" type="radio" value="<?= $v->amount?>" data-id="<?=$v->id?>"> <?= $v->amount?> <span class="sub-txt">满<span class='red-sm'>￥ <?= $v->min_amount?></span>可用</span>
+					</li>
+                   <?php }?>
+                 </ul>
+                 <?php }?>
+                 <p><label>实际支付金额:</label><span class="red" id="final-amount">￥<?= $order->amount?></span></p>
                 
             <?php if($order->status==0){?>
              <p class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</p>
@@ -116,6 +128,18 @@ $hasAddress=empty($order->address)?0:1;
 </div><!-- /.modal -->
 
 <script type="text/javascript">
+var amount=parseInt("<?= $order->amount?>");
+$("input[name=coupon]").change(function(){
+	var discount=parseInt($("input[name=coupon]").val());
+	var finalAmount=amount-discount;
+	if(finalAmount<0){
+		finalAmount=0;
+	}
+	$('#final-amount').html('￥'+finalAmount);
+	
+	
+});
+
 
 var hasAddress=<?= $hasAddress?>;
 

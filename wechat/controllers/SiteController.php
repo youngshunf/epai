@@ -267,6 +267,9 @@ class SiteController extends Controller
 
    public function actionPayOrder($order_guid){
            $order=Order::findOne(['order_guid'=>$order_guid]);
+           $order->orderno=Order::getOrderNO(1);
+           $order->save();
+           $user=yii::$app->user->identity;
            $jsApiParameters=array();
            if($order->is_pay==0){
            //初始化日志
@@ -274,7 +277,8 @@ class SiteController extends Controller
            $log = \Log::Init($logHandler, 15);
            //①、获取用户openid
            $tools = new \JsApiPay();
-           $openId = $tools->GetOpenid(yii::$app->request->absoluteUrl);
+//            $openId = $tools->GetOpenid(yii::$app->request->absoluteUrl);
+           $openId=$user->openid;
            //②、统一下单
            $input = new \WxPayUnifiedOrder();
            $input->SetBody($order->goods_name);
@@ -289,6 +293,7 @@ class SiteController extends Controller
            $input->SetTrade_type("JSAPI");
            $input->SetOpenid($openId);
            $wxorder = \WxPayApi::unifiedOrder($input);
+         
            $jsApiParameters = $tools->GetJsApiParameters($wxorder);
        }
        
@@ -404,27 +409,27 @@ class SiteController extends Controller
     
     }
 
-      public function actionLogin()
-    {
-     $model=new LoginForm();
+//       public function actionLogin()
+//     {
+//      $model=new LoginForm();
     
-     if($model->load(Yii::$app->request->post())&&$model->login()){
-         return $this->goBack();
-     }
+//      if($model->load(Yii::$app->request->post())&&$model->login()){
+//          return $this->goBack();
+//      }
          
-     return $this->render('login',['model'=>$model]);
-    }   
+//      return $this->render('login',['model'=>$model]);
+//     }   
     
     /**
      * 认证服务号登录,网页授权登录
      * @return \yii\web\Response
      */
-//      public function actionLogin()
-//     {
-//         $appid=yii::$app->params['appid'];
-//         $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
-//         return $this->redirect($url);
-//     }  
+     public function actionLogin()
+    {
+        $appid=yii::$app->params['appid'];
+        $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+        return $this->redirect($url);
+    }  
     
     /**
      * 认证服务号登录处理

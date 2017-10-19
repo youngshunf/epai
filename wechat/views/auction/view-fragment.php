@@ -32,7 +32,7 @@ $leftTime=intval( $model->end_time - time());
     if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
          <?php if($model->reverse_price!=0.00){?>
-                 <img alt="保留价" src="../img/baoliujia.png" style="width:28px;display: inline-block">
+                 <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block">
                  <?php }?>
        
        <?php if(!$hasLove){?>
@@ -136,7 +136,7 @@ $leftTime=intval( $model->end_time - time());
     <?php }else if( $now>$model->end_time ){?>
                   <p>成交价格:<span class="red">￥<?= $model->current_price?></span>
                    <?php if($model->reverse_price!=0.00){?>
-                     <img alt="保留价" src="../img/baoliujia.png" style="width:28px;display: inline-block">
+                     <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block;">
                      <?php }?>
                   
                  <?php if(!$hasLove){?>
