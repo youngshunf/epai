@@ -14,7 +14,14 @@ use common\models\Coupon;
 $this->title = "订单支付";
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 $hasAddress=empty($order->address)?0:1;
-$coupon=Coupon::findAll(['user_guid'=>$order->user_guid,'status'=>'1']);
+$time=time();
+if(empty($order->coupon_code)){
+    $coupon=Coupon::find()->andWhere(['user_guid'=>$order->user_guid,'status'=>'1'])->andWhere($order->amount."> min_amount and $time < end_time")->all();
+    $hasCoupon=count($coupon)>0?'1':'0';
+}else{
+    $hasCoupon=0;
+}
+
 ?>
 
     <div class="panel-white">
@@ -24,18 +31,21 @@ $coupon=Coupon::findAll(['user_guid'=>$order->user_guid,'status'=>'1']);
                  <p><label>订单编号:</label><span ><?= $order->orderno?></span></p>
                  <p><label>商品金额:</label><span class="red">￥<?= $order->total_amount?></span></p>
                  <?php if($order->seller_fee>0){?>
-                  <p><label>买家佣金:</label><span class="red">￥<?= $order->seller_fee?></span></p>
+                  <p><label>买家佣金:</label><span class="red"> + ￥<?= $order->seller_fee?></span></p>
+                 <?php }?>
+                 <?php if(!empty($order->coupon_code)){?>
+                  <p><label>优惠金额:</label><span class="red"> - ￥<?= $order->discount_amount?></span></p>
                  <?php }?>
                  <p><label>数量:</label><span class="green"><?= $order->number?></span></p>
                  <?php if(!empty($order->address)){?>
                  <p><label>收货地址:</label><span ><?= $order->address?></span></p>
                  <?php }?>
-                 <?php if(count($coupon)>0){?>
+                 <?php if(empty($order->coupon_code) && count($coupon)>0){?>
                  <p><label>您有可用优惠券:</label></p>
                  <ul class="mui-table-view">
                    <?php foreach ($coupon as $v){?>
-                   <li class="mui-table-view-cell mui-radio mui-left">
-						<input name="coupon" type="radio" value="<?= $v->amount?>" data-id="<?=$v->id?>"> <?= $v->amount?> <span class="sub-txt">满<span class='red-sm'>￥ <?= $v->min_amount?></span>可用</span>
+                   <li class="mui-table-view-cell mui-radio mui-left coupon" data-id="<?=$v->id?>" data-amount="<?=$v->amount?>">
+						<input name="coupon" type="radio" value="<?= $v->amount?>" data-code="<?= $v->coupon_code?>" ><span class="red">￥ <?= $v->amount?> </span>  <span class="sub-txt">满<span class='red-sm'>￥ <?= $v->min_amount?> </span>可用</span>
 					</li>
                    <?php }?>
                  </ul>
@@ -45,8 +55,8 @@ $coupon=Coupon::findAll(['user_guid'=>$order->user_guid,'status'=>'1']);
             <?php if($order->status==0){?>
              <p class="list-group-item" id="newAddress"><span class="glyphicon glyphicon-plus" style="color: rgb(255, 140, 60);"></span>新增收货地址</p>
              <div class="form-group center">
-             <input type="hidden" name="order-guid" value="<?= $order->order_guid?>">              
-                <button class="btn btn-success"  type="button"  onclick="callpay()"  >立即支付</button>
+                 <input type="hidden" name="order-guid" value="<?= $order->order_guid?>">              
+                <button class="btn btn-success"  type="button"  onclick="callpay()">立即支付</button>
               </div> 
               <?php }?> 
               
@@ -129,8 +139,13 @@ $coupon=Coupon::findAll(['user_guid'=>$order->user_guid,'status'=>'1']);
 
 <script type="text/javascript">
 var amount=parseInt("<?= $order->amount?>");
+var hasCoupon='<?= $hasCoupon?>';
+var discount=0;
+var coupon_code;
+var orderid='<?= $order->id?>';
 $("input[name=coupon]").change(function(){
-	var discount=parseInt($("input[name=coupon]").val());
+	 discount=parseInt($("input[name=coupon]:checked").val());
+	 coupon_code=$("input[name=coupon]:checked").data('code');
 	var finalAmount=amount-discount;
 	if(finalAmount<0){
 		finalAmount=0;
@@ -176,12 +191,19 @@ function checkAddress(){
 	showWaiting('正在提交,请稍候...');
 	return true;
 }
+
+var jsApiParameters=<?php echo empty($jsApiParameters)?'':$jsApiParameters; ?>;
 //调用微信JS api 支付
 function jsApiCall()
 {
+	if(!jsApiParameters){
+		location.href="<?= Url::to(['site/pay-result','order_guid'=>$order->order_guid])?>";
+		return;
+	}
+		
 	WeixinJSBridge.invoke(
 		'getBrandWCPayRequest',
-		<?php echo empty($jsApiParameters)?'':$jsApiParameters; ?>,
+        jsApiParameters,
 		function(res){
 			WeixinJSBridge.log(res.err_msg);
 			if(res.err_msg == "get_brand_wcpay_request:ok" ){
@@ -202,7 +224,41 @@ function callpay()
       modalMsg('请先填写收货地址再支付!');
       return;
 	}
+	if(hasCoupon){
+      if(discount==0){
+    	  callPayDo();
+      }else{
+		updateOrder();
+      }
+	}else{
+		callPayDo();
+	}
 	
+	
+}
+
+function updateOrder(){
+	$.ajax({
+      url:'update-order-with-discount',
+      method:'post',
+      data:{
+		orderid:orderid,
+		discount:discount,
+		coupon_code:coupon_code
+      },
+      dataType:'json',
+      success:function(rs){
+    	  jsApiParameters=rs;
+    	  callPayDo();
+      },
+      error:function(e){
+			mui.alert('发生错误,请稍候再试');
+      }
+ 
+	})
+}
+
+function callPayDo(){
 	if (typeof WeixinJSBridge == "undefined"){
 	    if( document.addEventListener ){
 	        document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
@@ -214,7 +270,6 @@ function callpay()
 	    jsApiCall();
 	}
 }
-
 
 
 </script>

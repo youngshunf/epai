@@ -28,11 +28,12 @@ use common\models\Message;
 use common\models\RegisterCoupon;
 use common\models\Coupon;
 use common\models\MobileVerify;
+use yii\helpers\Json;
 
 require_once "../../common/WxpayAPI/lib/WxPay.Api.php";
 require_once "../../common/WxpayAPI/example/WxPay.JsApiPay.php";
 require_once '../../common/WxpayAPI/example/log.php';
-require_once '../../common/WxpayAPI/example/log.php';
+
 /**
  * Site controller
  */
@@ -224,21 +225,21 @@ class SiteController extends Controller
                    $mobileVerify->is_valid=0;
                    $mobileVerify->save();
                    //发放注册优惠
-                   $registerCoupon=RegisterCoupon::find()->andWhere(['is_open'=>1])->one();
-                   if(!empty($registerCoupon)){
-                       $coupon=new Coupon();
-                       $coupon->coupon_code=Coupon::generateCouponCode();
-                       $coupon->user_guid=$currentUser->user_guid;
-                       $coupon->amount=$registerCoupon->amount;
-                       $coupon->min_amount=$registerCoupon->min_amount;
-                       $coupon->end_time=strtotime("+".$registerCoupon->expire_day." day");
-                       $coupon->type=1;
-                       $coupon->remark=$registerCoupon->remark;
-                       $coupon->status=1;
-                       $coupon->get_time=time();
-                       $coupon->created_at=time();
-                       $coupon->save();
-                   }
+//                    $registerCoupon=RegisterCoupon::find()->andWhere(['is_open'=>1])->one();
+//                    if(!empty($registerCoupon)){
+//                        $coupon=new Coupon();
+//                        $coupon->coupon_code=Coupon::generateCouponCode();
+//                        $coupon->user_guid=$currentUser->user_guid;
+//                        $coupon->amount=$registerCoupon->amount;
+//                        $coupon->min_amount=$registerCoupon->min_amount;
+//                        $coupon->end_time=strtotime("+".$registerCoupon->expire_day." day");
+//                        $coupon->type=1;
+//                        $coupon->remark=$registerCoupon->remark;
+//                        $coupon->status=1;
+//                        $coupon->get_time=time();
+//                        $coupon->created_at=time();
+//                        $coupon->save();
+//                    }
                    
                    yii::$app->getSession()->setFlash('success',"绑定成功！");
                    return  $this->redirect(['auction/round']);
@@ -300,6 +301,56 @@ class SiteController extends Controller
        return $this->render('pay-order',['order'=>$order,
            'jsApiParameters'=>$jsApiParameters
        ]);
+   }
+   
+   public function actionUpdateOrderWithDiscount(){
+       $orderid=$_POST['orderid'];
+       $discount_amount=$_POST['discount'];
+       $coupon_code=$_POST['coupon_code'];
+       $user=yii::$app->user->identity;
+       $order=Order::findOne(['id'=>$orderid]);
+       $order->orderno=Order::getOrderNO(1);
+       if( empty($order->coupon_code)){
+           $order->discount_amount=$discount_amount;
+           $order->coupon_code=$coupon_code;
+           $order->amount -=$discount_amount;
+           if($order->amount<=0){
+               $order->is_pay=1;
+               $order->status=1;
+           }
+           Coupon::updateAll(['status'=>'2'],['coupon_code'=>$coupon_code,'user_guid'=>$user->user_guid]);
+       }
+       $order->save();
+       
+       
+       $jsApiParameters='';
+       if($order->is_pay==0 && $order->amount>0){
+           //初始化日志
+           $logHandler= new \CLogFileHandler("../runtime/logs/".date('Y-m-d').'.log');
+           $log = \Log::Init($logHandler, 15);
+           //①、获取用户openid
+           $tools = new \JsApiPay();
+           //            $openId = $tools->GetOpenid(yii::$app->request->absoluteUrl);
+           $openId=$user->openid;
+           //②、统一下单
+           $input = new \WxPayUnifiedOrder();
+           $input->SetBody($order->goods_name);
+           $input->SetAttach($order->order_guid);
+           $input->SetOut_trade_no($order->orderno);
+           // $input->SetTotal_fee($order->support_amount*100);
+           $input->SetTotal_fee($order->amount*100);
+           $input->SetTime_start(date("YmdHis"));
+           $input->SetTime_expire(date("YmdHis", time() + 600));
+           $input->SetGoods_tag(yii::$app->user->identity->nick);
+           $input->SetNotify_url(yii::$app->params['paynotify']);
+           $input->SetTrade_type("JSAPI");
+           $input->SetOpenid($openId);
+           $wxorder = \WxPayApi::unifiedOrder($input);
+           
+           $jsApiParameters = $tools->GetJsApiParameters($wxorder);
+       }
+       return $jsApiParameters;
+      
    }
    
    public function actionPayDo(){

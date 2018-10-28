@@ -19,6 +19,7 @@ use common\models\WxpayRec;
 use yii\db\Exception;
 use common\models\WxpayRefundRec;
 use common\models\IdPhoto;
+use common\models\Coupon;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -77,7 +78,61 @@ class UserController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
+    public  function actionSendcoupon(){
+        $sendType=$_POST['sendtype'];
+        $amount=$_POST['amount'];
+        $end_time=strtotime($_POST['end_time']);
+        $minAmount=@$_POST['min_amount'];
+        $remark=@$_POST['remark'];
+        $res=0;
+        if($sendType=='2'){
+            foreach (User::find()->each(10) as $user) {
+                $coupon=new Coupon();
+                $coupon->user_guid=$user->user_guid;
+                $coupon->mobile=$user->mobile;
+                $coupon->amount=$amount;
+                $coupon->end_time=$end_time;
+                $coupon->min_amount=$minAmount;
+                $coupon->remark=$remark;
+                $coupon->get_time=time();
+                $coupon->coupon_code=Coupon::generateCouponCode();
+                $coupon->created_at=time();
+                $coupon->status=1;
+                $coupon->type=2;
+                if($coupon->save()){
+                    $res++;
+                }
+            }
+        }
+        
+        if($sendType=='1'){
+            $keys=$_POST['keys'];
+            $keys=explode(',', $keys);
+            foreach ($keys as $v){
+                $user=User::findOne($v);
+                $coupon=new Coupon();
+                $coupon->user_guid=$user->user_guid;
+                $coupon->mobile=$user->mobile;
+                $coupon->amount=$amount;
+                $coupon->end_time=$end_time;
+                $coupon->min_amount=$minAmount;
+                $coupon->remark=$remark;
+                $coupon->get_time=time();
+                $coupon->coupon_code=Coupon::generateCouponCode();
+                $coupon->created_at=time();
+                $coupon->status=1;
+                $coupon->type=2;
+                if($coupon->save()){
+                    $res++;
+                }
+            }
+        }
+        
+        yii::$app->getSession()->setFlash('success','发放成功,本次总共发放'.$res.'张优惠券');
+        return $this->redirect(yii::$app->request->referrer);
+    }
 
+    
     /**
      * Displays a single User model.
      * @param integer $id

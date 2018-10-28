@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>function ($model){
               return CommonUtil::getDescByValue('order', 'status', $model->status); 
            }],
+           'address',
             [	'class' => 'yii\grid\ActionColumn',
              	'header'=>'操作',
              	'options'=>['width'=>'200px'],

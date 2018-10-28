@@ -17,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('修改', ['update-siteinfo', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
     </p>
+  
 
    <?= $model->content?>
 </div>

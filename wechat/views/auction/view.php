@@ -114,7 +114,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                 <td>加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
                  
                  </td>                
                  </tr>
@@ -159,7 +159,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                 <td>加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
                   
                  </td>
                  
@@ -551,13 +551,15 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 </div><!-- /.modal -->
 
 <script type="text/javascript">
-
-window.addEventListener("popstate", function(e) {  //回调函数中实现需要的功能
-    
-    location.href='/auction/round-view?id='+"<?= $model->roundid ?>";  //在这里指定其返回的地址
-
-}, false);  
-
+window.onload=function(){
+	setTimeout(function(){
+        window.addEventListener("popstate", function(e) {  //回调函数中实现需要的功能
+            
+            location.href='/auction/round-view?id='+"<?= $model->roundid ?>";  //在这里指定其返回的地址
+        
+        }, false);  
+	},100);
+}
 function pushHistory() {  
     var state = {  
         title: "title",  
@@ -586,11 +588,11 @@ function getFragment(){
       success:function(rs){
 		$('#refreshContainer').html(rs);
 		console.log('refresh');
-// 		if(intervalCountDowns.[0]){
-// 			clearInterval(intervalCountDown);
-// 		}
+		if(intervalCountDowns[0]){
+			clearInterval(intervalCountDowns[0]);
+		}
 		$('#bid-price').focus();
-		//countDown();
+		countDown();
       }
 	})
 }

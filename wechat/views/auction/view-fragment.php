@@ -105,7 +105,7 @@ $leftTime=intval( $model->end_time - time());
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                 <td>加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
                   </td>                
                  </tr>
                  
@@ -150,7 +150,7 @@ $leftTime=intval( $model->end_time - time());
                  <table>
                  <tr>
                  <td>起拍价格:<span class="red-sm">￥<?= $model->start_price?></span></td>
-                 <td>加价幅度:<span class="red-sm">￥<?= $model->delta_price?></span>
+                 <td>加价幅度:<span class="red-sm">￥<?= $delta_price?></span>
                  
                  </td>
                  

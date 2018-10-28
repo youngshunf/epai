@@ -106,7 +106,7 @@ $this->registerCssFile('@web/nivo-slider/nivo-slider.css');
 				 
 				 <?php foreach ($treasures as $k=>$v){?>
 				 <?php if($k==0){?>
-        		<div class="media">
+        		 <div class="media">
                    <a class="pull-left" href="<?= Url::to(['treasure/view','id'=>$v->newsid])?>">
                       <img class="media-object " src="<?= yii::getAlias('@photo').'/'.$v->path.'thumb/'.$v->photo?>" 
                       alt="<?= $v->title?>">

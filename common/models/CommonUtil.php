@@ -411,7 +411,10 @@ use yii\db\Exception;
      }
      
      public static function truncateMobile($mobile){
-         return $mobile[0].$mobile[1].$mobile[2]."****".$mobile[7].$mobile[8].$mobile[9].$mobile[10];
+         if($mobile && strlen($mobile)>=11){
+             return $mobile[0].$mobile[1].$mobile[2]."****".$mobile[7].$mobile[8].$mobile[9].$mobile[10];
+         }
+         return  $mobile;
      }
      
      public static function getRandomMobile(){

@@ -208,7 +208,32 @@ class AuctionController extends Controller
     }
     
     public function actionDeleteRec($id){
-        AuctionBidRec::findOne($id)->delete();
+        $model=AuctionBidRec::findOne($id);
+        if($model->is_deal==1){
+            yii::$app->getSession()->setFlash('error','已经成交,不能删除!');
+            return $this->redirect(yii::$app->request->referrer);
+        }
+        $leading=$model->is_leading;
+        $goods_guid=$model->goods_guid;
+        $model->delete();
+        $topPrice=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->max('price');
+        if(empty($topPrice)){
+            $topPrice=0;
+        }
+        if($leading==1){
+            
+           // AuctionBidRec::updateAll(['is_leading'=>'1'],['goods_guid'=>$goods_guid,'price'=>$topPrice]);
+            $lastLeading=AuctionBidRec::findOne(['goods_guid'=>$goods_guid,'price'=>$topPrice]);
+            if(!empty($lastLeading)){
+                AuctionGoods::updateAll(['current_price'=>$topPrice,'leading_user'=>$lastLeading->user_guid],['goods_guid'=>$goods_guid]);
+                $lastLeading->is_leading=1;
+                $lastLeading->save();
+            }
+            
+        }
+        $count=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->count();
+        AuctionGoods::updateAll(['count_auction'=>$count],['goods_guid'=>$goods_guid]);
+        
         yii::$app->getSession()->setFlash('success','删除成功!');
         return $this->redirect(yii::$app->request->referrer);
     }

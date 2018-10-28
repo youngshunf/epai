@@ -320,11 +320,7 @@ var app= new Vue({
   });
 
 
-window.addEventListener("popstate", function(e) {  //回调函数中实现需要的功能
-    
-    location.href='/auction/round';  //在这里指定其返回的地址
-
-}, false);  
+window.onload=function(){
 
 function pushHistory() {  
     var state = {  
@@ -334,11 +330,17 @@ function pushHistory() {
     window.history.pushState(state, "title", "#");  
  
 }  
-
 pushHistory();
+setTimeout(function(){
+	window.addEventListener("popstate", function(e) {  //回调函数中实现需要的功能
+	    location.href='/auction/round';  //在这里指定其返回的地址
+	}, false);  
+},100);
+}
+
 window.onpageshow = function(event){
     if (event.persisted) {
-     
+   	 window.location.reload();
     }
 }
 

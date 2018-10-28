@@ -17,9 +17,7 @@ $this->title = '支付结果';
       <?php if($order->is_pay==0){?>
         <h1 class="center" ><i class="icon-remove red-normal"></i> 支付失败!</h1>
         <br>  
-      
       <?php }else{?>
-
         <h1 class="center" ><i class="icon-ok time"></i> 支付成功!</h1>
         <br>  
         <?php }?>
@@ -27,8 +25,16 @@ $this->title = '支付结果';
       <h3 >订单信息:</h3>
       <ul class="mui-table-view">
       <li class="mui-table-view-cell">      <p><span class="bold">商品名称:</span> <?=$order->goods_name ?></p></li>
-       <li class="mui-table-view-cell">    <p><span class="bold">支付金额:</span> <i class="red-normal">￥<?=$order->amount ?></i></p></li>
        <li class="mui-table-view-cell">    <p><span class="bold">数量: </span> <i class="green"><?=$order->number ?></i></p></li>
+        <li class="mui-table-view-cell">    <p><span class="bold">商品金额: </span> <i class="red-normal"> ￥ <?=$order->total_amount ?></i></p></li>
+        <?php if($order->seller_fee>0){?>
+         <li class="mui-table-view-cell">    <p><span class="bold">买家佣金: </span> <i class="red-normal"> + ￥<?=$order->seller_fee ?></i></p></li>
+       <?php }?>
+       <?php if($order->discount_amount>0){?>
+          <li class="mui-table-view-cell">    <p><span class="bold">优惠金额: </span> <i class="red-normal"> - ￥<?=$order->discount_amount?></i></p></li>
+      <?php }?>
+       <li class="mui-table-view-cell">    <p><span class="bold">支付金额:</span> <i class="red">￥<?=$order->amount ?></i></p></li>
+      
        <li class="mui-table-view-cell">       <p><span class="bold">支付时间:</span><?=CommonUtil::fomatTime($order->pay_time) ?></p></li>
         <?php if($order->is_pay==1&&$order->type==3){?>
                <li class="mui-table-view-cell">

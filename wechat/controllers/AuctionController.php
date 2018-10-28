@@ -62,8 +62,9 @@ class AuctionController extends Controller
                yii::$app->getUser()->setReturnUrl(yii::$app->getRequest()->getAbsoluteUrl());
         }
         
-     if(!yii::$app->user->isGuest){
+     if(!yii::$app->user->isGuest && $action->id=='submit-bid'){
             if(!empty(yii::$app->user->identity->openid)&&yii::$app->user->identity->is_band==0){
+                yii::$app->getSession()->setFlash('error','您需要先绑定手机号才能出价!');
                 return $this->redirect(['site/band-user']);
             }
         }
@@ -605,6 +606,10 @@ class AuctionController extends Controller
     
     public function actionSubmitBid(){
         $user_guid=yii::$app->user->identity->user_guid;
+        if(!empty(yii::$app->user->identity->openid)&&yii::$app->user->identity->is_band==0){
+            yii::$app->getSession()->setFlash('error','您需要先绑定手机号才能出价!');
+            return $this->redirect(['site/band-user']);
+        }
         $goods_guid=$_POST['goods-guid'];
         $price=$_POST['bid-price'];
         $auctionGoods=AuctionGoods::findOne(['goods_guid'=>$goods_guid]);
@@ -674,7 +679,7 @@ class AuctionController extends Controller
         $leading_user=$auctionGoods->leading_user;
         $auctionGoods->leading_user=$user_guid;
         if($auctionGoods->end_time - time() <=60){
-            $auctionGoods->end_time +=60;
+            $auctionGoods->end_time +=90;
             $round=AuctionRound::findOne($auctionGoods->roundid);
             if(!empty($round)){
                 if($round->end_time<$auctionGoods->end_time){
