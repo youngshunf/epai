@@ -617,7 +617,7 @@ class AuctionController extends Controller
         $lastLeadingUser=$auctionGoods->leading_user;
         $auctionTimes=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->count();
         $now=time();
-        if($auctionGoods->leading_user==$user_guid && ($auctionGoods->current_price>$auctionGoods->reverse_price)){
+        if($auctionGoods->leading_user==$user_guid && ($auctionGoods->current_price>=$auctionGoods->reverse_price)){
             yii::$app->getSession()->setFlash('error',"您已经是最高价了,无需再出价");
             return $this->redirect(['view','id'=>$auctionGoods->id]);
         }
