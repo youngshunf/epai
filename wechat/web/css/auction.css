@@ -1,13 +1,32 @@
 ui,li{list-style:none;}
 i{font-style:normal}
 .auction{ 
-border:1px solid #dbd9d9;
 background: #fff;
-box-shadow: 0 0 11px #C0C4CD;
+}
+ul.auction{
+	margin-bootom:0 !important;
+}
+.auction h5{
+	margin-top:0;
+	margin-bottom:0;
+}
+.no-margin{
+	margin:0 !important;
+}
+.row.auction-item{
+	margin: 0 0 3px 0 !important;
+}
+.auction-item{
+	background:#fff;
+	padding-bottom:0 !important;
+	border-bottom: 1px solid #eee;
+}
+.countdown-text{
+	color:#000
 }
 .auction .pai-item{
-	margin:10px;
-	
+	margin:0px;
+	padding:5px;
 }
 .pai-item img{  margin:0 auto;
 			   width:100%;
@@ -26,7 +45,7 @@ position:absolute;
   top: 0px;
 background-color: #F74855;
 color:#fff;
-padding:10px;
+padding:5px;
 }
 
 .item-lottery-box {
@@ -46,8 +65,8 @@ display:inline;
 }
 .pai-countdown i{
 color:#dd2323;
-font-size:16px;
-font-weight:600;
+font-size:14px;
+font-weight:500;
 font-family: Tahoma;}
 
 .pai-countdown .prev i{

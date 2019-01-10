@@ -15,12 +15,23 @@ use common\models\Address;
 $this->title = $model->name;
 $leftTime=intval( $model->end_time -time() );
 $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
+$this->registerJsFile('@web/js/scale.js');
+$this->registerCssFile('@web/css/scale.css');
 ?>
-
+<style>
+.imgzoom_pack{
+	background:#000;
+}
+#goods-desc img{
+	max-width:100%;
+}
+</style>
 <div>
-<a href="#">
-<img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo?>" class="img-responsive">
-</a>
+<div class="img-wraper list">
+<img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.$model->photo?>" class="img-responsive">
+
+</div>
+
     <div class="row" id="refreshContainer">
   
   <div class="col-md-6" id="modelHead" data-currentprice="<?= $model->current_price?>" data-deltaprice="<?= $delta_price?>" data-currenttime="<?=$auctionTimes?>" >
@@ -32,13 +43,16 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
    if($model->current_price<$model->reverse_price){?>
 		<p class="organe center">未达到保留价</p>
 	<?php }else{?>
-		<p class="organe center">拍品已达到保留价</p>
+<!-- 		<p class="organe center">拍品已达到保留价</p> -->
 	<?php }}?>
 
     <?php 
     $now=time();
     if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
+       <?php if(!empty($agentBid)&& $agentBid->user_guid==yii::$app->user->identity->user_guid){?>
+       <p>您当前最高代理价:<span class="red">￥<?= $agentBid->top_price?></span>
+       <?php }?>
        <?php if($model->reverse_price!=0.00){?>
                  <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block">
                  <?php }?>
@@ -88,7 +102,8 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                   <?php if(yii::$app->user->identity->status==0){?>
 					<span class="red">您已被禁止参与拍卖,请及时购买已经成交的拍品.</span>
 					<?php }else{?>
-					<button  class="btn btn-lg btn-danger  bid-btn"  >出价</button>
+					<button  class="btn  btn-danger  bid-btn"  >出价</button>
+					<button  class="btn  btn-success  agent-bid-btn" >代理出价</button>
 					<?php if($model->current_price<$model->reverse_price){?>
 					<p  style="margin-top:15px"><span class="organe">该拍品有保留价</span></p>
 					<?php }?>
@@ -238,7 +253,13 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
             ['attribute'=> '竞拍人',
             'format' => 'html',
             'value'=>function ($model){
-               return empty($model->user->name)?CommonUtil::truncateMobile($model->user->mobile):$model->user->name;
+                if(yii::$app->user->identity->user_guid==$model->user->user_guid){
+                    return '您本人';
+                }
+                if(!empty($model->rand_name)){
+                    return $model->rand_name;
+                }
+                return empty($model->user->name)?CommonUtil::truncateMobile($model->user->mobile):$model->user->name;
             }],
              ['attribute'=> '价格',
             'format' => 'html',
@@ -280,7 +301,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
     </div>
     <?php }?>
     
-    <div >
+    <div id="goods-desc">
    
        <?= $model->desc?>
     </div>
@@ -317,8 +338,8 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
             </div>
          <?php }else{?>
             	<form action="<?= Url::to(['submit-bid'])?>" id="bid-form" method="post" onsubmit="return check()">
-            	<p>当前价格:<span class="red">￥ <span id="current-price"><?= $model->current_price?> </span></span></p>
-            	<p>当前加价幅度:<span class="red">￥ <span id="delta-price"><?= $delta_price?></span> </span></p>
+            	<p>当前价格:<span class="red">￥ <span class="current-price"><?= $model->current_price?> </span></span></p>
+            	<p>当前加价幅度:<span class="red">￥ <span class="delta-price"><?= $delta_price?></span> </span></p>
             	<div class="form-group required" >
             	<label class="label-control">下一手最低出价:</label>
             	<input type="text" name="bid-price" id="bid-price" class="form-control" value="<?= $model->current_price+$delta_price?>">
@@ -390,17 +411,17 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
                 </p>
             </div>
          <?php }else{?>
-            	<form action="<?= Url::to(['submit-agent'])?>" method="post" onsubmit="return checkAgent()">
-            	<p>当前价格:<span class="red">￥<?= $model->current_price?></span></p>
-            	<p>当前加价幅度:<span class="red">￥<?= $delta_price?></span></p>
+            	<form action="<?= Url::to(['submit-agent'])?>" id="agent-bid-form"  method="post" onsubmit="return checkAgent()">
+            	<p>当前价格:<span class="red">￥ <span class="current-price"><?= $model->current_price?> </span></span></p>
+            	<p>当前加价幅度:<span class="red">￥ <span class="delta-price"><?= $delta_price?></span> </span></p>
             	
             	<div class="form-group required" >
             	<label class="label-control">最高价格:</label>
-            	<input type="text" name="agent-price" id="agent-price" class="form-control">            
+            	<input type="text" name="agent-price" id="agent-bid-price" class="form-control">            
             	</div>
             	<input type="hidden" name="goods-guid"  value="<?= $model->goods_guid?>">
              <div class="form-group center">
-            	<button type="submit" class="btn btn-success ">提交</button>
+            	<button type="button" class="btn btn-success " id="agent-bid-btn">提交</button>
             	</div>
             	</form>
             	<?php }?>
@@ -550,6 +571,11 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
 </div>
 </div><!-- /.modal -->
 
+ <section class="imgzoom_pack">
+        <div class="imgzoom_x">X</div>
+        <div class="imgzoom_img"><img src="" /></div>
+    </section>
+
 <script type="text/javascript">
 window.onload=function(){
 	setTimeout(function(){
@@ -570,6 +596,8 @@ function pushHistory() {
 }  
 
 pushHistory();
+
+
 
 
 window.onpageshow = function(event){
@@ -593,6 +621,7 @@ function getFragment(){
 		}
 		$('#bid-price').focus();
 		countDown();
+		
       }
 	})
 }
@@ -610,8 +639,10 @@ function countDown(){
 	    		offset: +10
 	    	}, function () {
 	    	//	alert('倒计时结束!');
+	    		that.find('.agent-btn').addClass('hide');
 	    		that.find('.bid-btn').removeClass('btn-danger');
 	        	that.find('.bid-btn').html('已结束');
+	        	
 	        	
 	        	that.find('.prev-btn').removeClass('btn-success');
 	        	that.find('.prev-btn').addClass('btn-danger');
@@ -623,6 +654,8 @@ $(document).ready(function(){
 	countDown();
 });
 
+var bidType='bid';
+
 $(document).on("click", "#bidSubmit",function(){
 	var bidPrice=$('#bid-price').val();
 	$('#bid-price-final').html(bidPrice);
@@ -632,26 +665,48 @@ $(document).on("click", "#bidSubmit",function(){
 $(document).on("click",".bid-btn",function(){
 	var currentPrice=parseInt($('#modelHead').data('currentprice'));
 	var deltaPrice=parseInt($('#modelHead').data('deltaprice'));
-	$('#current-price').html(currentPrice);
-	$('#delta-price').html(deltaPrice);
+	$('.current-price').html(currentPrice);
+	$('.delta-price').html(deltaPrice);
 	$('#bid-price').val(currentPrice+deltaPrice);
     $("#submit-bid").modal("show");
     $('#bid-price').focus();
+    bidType='bid';
+});
+
+$(document).on("click",".agent-bid-btn",function(){
+	var currentPrice=parseInt($('#modelHead').data('currentprice'));
+	var deltaPrice=parseInt($('#modelHead').data('deltaprice'));
+	$('.current-price').html(currentPrice);
+	$('.delta-price').html(deltaPrice);
+	$('#agent-bid-price').val(currentPrice+deltaPrice);
+	$("#submit-agent").modal("show");
+    $('#agent-bid-price').focus();
+    bidType='agent-bid';
 });
 
 $(document).on("click", "#newAddress",function(){
     $("#AddressModal").modal("show");
 });
 $(document).on("click", "#final-submit",function(){
-	
-    $('#bid-form').submit();
+	if(bidType=='bid'){
+		$('#bid-form').submit();
+	}else{
+		$('#agent-bid-form').submit();
+	}
+    
 });
 
-$(".agent-btn").click(function(){
-	
-	
-    $("#submit-agent").modal("show");
+$(document).on("click",'#agent-bid-btn',function(){
+	var bidPrice=$('#agent-bid-price').val();
+	$('#bid-price-final').html(bidPrice);
+	$("#submit-agent").modal("hide");
+    $("#confirmBidModal").modal("show");
 });
+
+
+// $(".agent-btn").click(function(){
+//     $("#submit-agent").modal("show");
+// });
 
 $('#submit-guarantee').click(function(){
   $('#ruleModal').modal('show');
@@ -711,7 +766,7 @@ function checkAgent(){
 	if(isAgentSubmit){
 		return false;
 	}
-	var price=parseInt($("#agent-price").val());
+	var price=parseInt($("#agent-bid-price").val());
 	
     if(!checkPrice(price)){
         return false;
@@ -793,5 +848,13 @@ wx.ready(function () {
         }  
     });  
 });  
+
+document.addEventListener("DOMContentLoaded", function(event){
+	$('#goods-desc').find("img").wrap("<div class='list'></div>");
+    ImagesZoom.init({
+        "elem": ".list"
+    });
+}, false);
+
 
 </script>

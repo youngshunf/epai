@@ -25,7 +25,7 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
 </style>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-<div class="row" id="question" v-cloak>
+<div  id="question" v-cloak>
     <?php
 //     echo ListView::widget([
 //             'dataProvider'=>$dataProvider,
@@ -50,28 +50,41 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
     ?>
 
 
-<div >
+
 <scroller :on-refresh="refresh"
             :on-infinite="infinite"
             ref="scroller"
             no-data-text="没有更多拍品"
             >
             
-    <div class="col-md-3" v-for="(item,index) in list"   >
+    <div class="row auction-item" v-for="(item,index) in list"   >
+    <a :href="'view?id='+item.id">
+    	<div class="col-xs-4">
+    	<div style="position:relative">
+    		
+					<img :src="baseUrl+item.path+'thumb/'+item.photo"  class="img-responsive">
+		   
+		    <div class="item-bid-box">
+                    <span class="side-num">{{item.count_auction}}</span>次出价
+				</div>
+			</div>
+		  </div>
+		  <div class="col-xs-8">
             <ul class="auction">
             <li class="pai-item">
-     		<a :href="'view?id='+item.id">
-					<img :src="baseUrl+item.path+'mobile/'+item.photo"  class="img-responsive">
-		    </a>
+     		
 		    <div v-if="time>=item.start_time&& time<=item.end_time">
 		    <div class="pai-content"  :class="[ ((item.end_time-time)>=0 && (item.end_time-time)<=60)?'auction-alert':'']">
-				 <h3 class="ellipsis">{{item.name}}</h3>
-				 <p>起拍价格:<i class="red-sm">￥ {{item.start_price}}</i> <span class="pull-right"> 当前价格:<i class="red">￥ {{item.current_price}}</i></span></p>				 
+				 <h5 class="ellipsis clamp-2">{{item.name}}</h5>
+				 <p class="no-margin">起拍价格:<i class="red-sm">￥ {{item.start_price}}</i></p>
+				  <p class="no-margin"><span class=""> 当前价格:<i class="red">￥ {{item.current_price}}</i></span></p>				 
 				 <div class="item-countdown"  :time="getformatTime(item.end_time)" >
+				
 				 &nbsp;<span class="countdown-text">距结束</span>&nbsp;
 				 <p class=" pai-countdown" >
                         <span class="J_TimeLeft"><i class="days">00</i>天<i class="hours">00</i> 时 <i class="minutes">00</i> 分 <i class="seconds">00</i> 秒</span>
                  </p>
+                
                   <div class="item-button">
 					<a :href="'view?id='+item.id" class="btn btn-default btn-sm">围观({{item.count_view}})</a>
 					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-sm" >出价</a>
@@ -80,14 +93,13 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
                  </div>
 								 				 
 				</div>
-				<div class="item-bid-box">
-                    <span class="side-num">{{item.count_auction}}</span>次出价
-				</div>
+				
 			</div>
 			<div v-if="time < item.start_time ">
 		    <div class="pai-content"  :class="[ ((item.end_time-time)>=0 && (item.end_time-time)<=60)?'auction-alert':'']">
-				 <h3 class="ellipsis">{{item.name}}</h3>
-				 <p>起拍价格:<i class="red-sm">￥ {{item.start_price}}</i> <span class="pull-right"> 当前价格:<i class="red">￥ {{item.current_price}}</i></span></p>				 
+				 <h5 class="ellipsis clamp-2">{{item.name}}</h5>
+				 <p class="no-margin">起拍价格:<i class="red-sm">￥ {{item.start_price}}</i></p> 
+				 <p class="no-margin"> 当前价格:<i class="red">￥ {{item.current_price}}</i></p>				 
 				 <div class="item-countdown"  :time="getformatTime(item.start_time)" >
 				 &nbsp;<span class="countdown-text">距开始</span>&nbsp;
 				 <p class=" pai-countdown" >
@@ -101,20 +113,18 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
                  </div>
 								 				 
 				</div>
-				<div class="item-bid-box">
-                    <span class="side-num">{{item.count_auction}}</span>次出价
-				</div>
+				
 			</div>
 			
 			<div v-if="time>item.end_time">
 		    <div class="pai-content"  :class="[ ((item.end_time-time)>=0 && (item.end_time-time)<=60)?'auction-alert':'']">
-				 <h3 class="ellipsis">{{item.name}}</h3>
-				 <p>起拍价格:<i class="red-sm">￥ {{item.start_price}}</i> <span class="pull-right"> 当前价格:<i class="red">￥ {{item.current_price}}</i></span></p>				 
+				 <h5 class="ellipsis clamp-2">{{item.name}}</h5>
+				 <p class="no-margin">起拍价格:<i class="red-sm">￥ {{item.start_price}}</i></p>
+				 <p class="no-margin"> <span class=""> 当前价格:<i class="red">￥ {{item.current_price}}</i></p>				 
 				 <div  >
 				 <span class="organe">
 				 {{getStatus(item)}}
 				 </span>&nbsp;&nbsp;
-				
                   <div class="item-button">
 					<a :href="'view?id='+item.id" class="btn btn-default btn-sm">围观({{item.count_view}})</a> 
 					<a :href="'view?id='+item.id" class="btn btn-danger bid-btn btn-sm" >出价</a>
@@ -123,17 +133,17 @@ $this->registerJsFile('@web/js/vue-scroller.min.js',['position'=> View::POS_HEAD
                  </div>
 								 				 
 				</div>
-				<div class="item-bid-box">
-                    <span class="side-num">{{item.count_auction}}</span>次出价
-				</div>
+				
 			</div>
 			
            </li>
             </ul>
+           </div>
+            </a>
       </div>
 <!--     <div v-if="infiniteCount >= 2" slot="infinite" class="center">没有更多数据</div> -->
   </scroller>
-</div>
+
 
 </div>
 <script>

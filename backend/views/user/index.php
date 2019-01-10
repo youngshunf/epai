@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\SearchUser */
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
    <button class="btn btn-success" id="sendCheck">发放优惠券(选中用户)</button>
 	<button class="btn btn-primary" id="sendAll">发放优惠券(全部用户)</button>
+	<a class="btn btn-success" href="<?= Url::to(['export-user']) ?>">导出用户</a>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

@@ -132,6 +132,49 @@ class UserController extends Controller
         return $this->redirect(yii::$app->request->referrer);
     }
 
+    public function actionExportUser(){
+        
+            $model=User::find()->where("mobile != ''")->orderBy('created_at desc')->all();
+        
+        if(empty($model)){
+            yii::$app->getSession()->setFlash('error','没有数据哦!');
+            return $this->redirect(yii::$app->getRequest()->referrer);
+        }
+        
+        $resultExcel=new \PHPExcel();
+        $resultExcel->getActiveSheet()->setCellValue('A1','序号');
+        $resultExcel->getActiveSheet()->setCellValue('B1','手机号');
+        $resultExcel->getActiveSheet()->setCellValue('C1','姓名');
+        $resultExcel->getActiveSheet()->setCellValue('D1','昵称');
+        $resultExcel->getActiveSheet()->setCellValue('E1','地区');
+        $resultExcel->getActiveSheet()->setCellValue('F1','注册时间');
+       
+        $i=2;
+        foreach ($model as $k=>$v){
+            $resultExcel->getActiveSheet()->setCellValue('A'.$i,$k+1);
+            $resultExcel->getActiveSheet()->setCellValue('B'.$i,$v->mobile);
+            $resultExcel->getActiveSheet()->setCellValue('C'.$i,$v->name);
+            $resultExcel->getActiveSheet()->setCellValue('D'.$i,"'".$v->nick);
+            $resultExcel->getActiveSheet()->setCellValue('E'.$i,$v->province);
+            $resultExcel->getActiveSheet()->setCellValue('F'.$i,CommonUtil::fomatTime($v->created_at));
+          
+            $i++;
+        }
+        
+        //设置导出文件名
+        $outputFileName ="用户信息".date('Y-m-d',time()).'.xls';
+        $xlsWriter = new \PHPExcel_Writer_Excel5($resultExcel);
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");
+        header('Content-Disposition:inline;filename="'.$outputFileName.'"');
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: no-cache");
+        $xlsWriter->save( "php://output" );
+    }
     
     /**
      * Displays a single User model.

@@ -34,10 +34,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
     <div class="col-md-6">
    <img alt="封面图片" src="<?= yii::getAlias('@photo').'/'.$model->path.'mobile/'.$model->photo?>" class="img-responsive">
-  
+  <?php if(!empty($model->video_url)){?>
   <div class="center">
      <video src="<?= $model->video_url?>" poster="<?= $model->poster_url?>" controls height="250px" width="100%" preload style="background:#000;max-width:100%"></video>
      </div>
+  
+  <?php }?>
   </div>
   <div class="col-md-6">
     
@@ -50,6 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'reverse_price',
             'eval_price',
             'current_price',
+            'postage',
+            'express_postage',
             'count_auction',
             'count_view',
             'count_collection',

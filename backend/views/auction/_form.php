@@ -36,7 +36,9 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
             'format' => 'yyyy-mm-dd h:i'
         ]
     ]); ?>
-     
+    
+    <?= $form->field($model, 'postage')->textInput(['type'=>'number']) ?>
+      <?= $form->field($model, 'express_postage')->textInput(['type'=>'number']) ?>
     </div>
      
      <div class="col-md-6">
@@ -64,7 +66,7 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
         </div>
         
       <div class="form-group">
-        <label class="control-label"> 封面图片(推荐尺寸:720*400)</label>
+        <label class="control-label"> 封面图片(推荐尺寸:400*400)</label>
         <div class="img-container">
         <?php if(empty($model->photo)){?>
                 <div class="uploadify-button"> 

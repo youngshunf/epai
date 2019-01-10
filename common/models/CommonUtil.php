@@ -465,6 +465,20 @@ use yii\db\Exception;
                          $order->amount +=$fee;
                      }
                  }
+                 //计算邮费
+                 $postage=0;
+                 if($v->express_postage>0 && $v->postage>0){
+                     $postage=$v->express_postage;
+                 }elseif($v->express_postage>0){
+                     $postage=$v->express_postage;
+                 }elseif ($v->postage>0){
+                     $postage=$v->postage;
+                 }
+                 if($postage>0){
+                     $order->postage=$postage;
+                     $order->amount +=$postage;
+                 }
+                 
                  $address=Address::findOne(['user_guid'=>$auctionRec->user_guid,'is_default'=>1]);
                  if(!empty($address)){
                      $order->address_id=$address->id;
@@ -546,7 +560,7 @@ use yii\db\Exception;
          $result=false;
          $finalData=[
              "touser"=>$user->openid,
-             "template_id"=>'RJL21kj3WHFNaj4bWaPjNupB3m0wAEdhcQITKiz9A2Y',
+             "template_id"=>'3VkCMmrgyszcM6pRJtZ5dDe3dKKA8jZ4PPIwJ3FU-II',
              "url"=>'http://wechat.1paibao.net/auction/view?id='.$goodsid,
              "topcolor"=>"#FF0000",
              "data"=>$data
@@ -566,8 +580,13 @@ use yii\db\Exception;
          }
          $sendModel=new WeChatTemplate(yii::$app->params['appid'], yii::$app->params['appsecret']);
          $user=User::findOne(['user_guid'=>$user_guid]);
+         if(!$user->openid){
+             return false;
+         }
          $round=AuctionRound::findOne($roundid);
-         $count=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->count();
+        // $count=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->count();
+         $count=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->sum(' count_auction ') ;
+         $goods=AuctionGoods::find()->andWhere(['roundid'=>$roundid])->orderBy('sort asc')->one();
          $name=$round->name;
          if($user->role_id==0){
              return false;
@@ -586,7 +605,7 @@ use yii\db\Exception;
              "color"=>"#173177"
          ];
          $data['keyword1']=[
-             "value"=>$count . '件',
+             "value"=>$round->name,
              "color"=>"#173177"
          ];
          $data['keyword2']=[
@@ -594,11 +613,15 @@ use yii\db\Exception;
              "color"=>"#173177"
          ];
          $data['keyword3']=[
-             "value"=>$round->name,
+             "value"=>$count,
              "color"=>"#173177"
          ];
          $data['keyword4']=[
-             "value"=>CommonUtil::fomatTime($round->end_time),
+             "value"=>'拍卖中',
+             "color"=>"#173177"
+         ];
+         $data['keyword5']=[
+             "value"=>CommonUtil::fomatTime($goods->end_time),
              "color"=>"#173177"
          ];
          $data['remark']=[
@@ -608,7 +631,7 @@ use yii\db\Exception;
          $result=false;
          $finalData=[
              "touser"=>$user->openid,
-             "template_id"=>'8qeY18Z3OgxOpzhFiqa2duV4R91IvCl4JtUjfIsuil4',
+             "template_id"=>'3VkCMmrgyszcM6pRJtZ5dDe3dKKA8jZ4PPIwJ3FU-II',
              "url"=>'http://wechat.1paibao.net/auction/round-view?id='.$roundid,
              "topcolor"=>"#FF0000",
              "data"=>$data

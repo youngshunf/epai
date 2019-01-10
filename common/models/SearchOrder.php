@@ -19,7 +19,7 @@ class SearchOrder extends Order
     {
         return [
             [['id', 'type', 'number', 'status', 'is_pay', 'pay_time', 'sent_time', 'confirm_time', 'cancel_time', 'created_at', 'updated_at'], 'integer'],
-            [['user_guid', 'order_guid', 'orderno', 'biz_guid', 'goods_name', 'express_number','merchant_user','order_type'], 'safe'],
+            [['user_guid', 'order_guid', 'orderno', 'biz_guid', 'goods_name', 'express_number','merchant_user','order_type','address'], 'safe'],
             [['amount'], 'number'],
         ];
     }
@@ -76,6 +76,7 @@ class SearchOrder extends Order
             ->andFilterWhere(['like', 'order_guid', $this->order_guid])
             ->andFilterWhere(['like', 'orderno', $this->orderno])
             ->andFilterWhere(['like', 'goods_name', $this->goods_name])
+            ->andFilterWhere(['like', 'address', $this->address])
             ->andFilterWhere(['like', 'express_number', $this->express_number]);
 
         return $dataProvider;

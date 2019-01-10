@@ -353,6 +353,62 @@ class SiteController extends Controller
       
    }
    
+   public function actionUpdateOrderWithPostage(){
+       $orderid=$_POST['orderid'];
+       $type=$_POST['type'];
+       $user=yii::$app->user->identity;
+       $order=Order::findOne(['id'=>$orderid]);
+       $order->orderno=Order::getOrderNO(1);
+       $goods=AuctionGoods::findOne(['goods_guid'=>$order->biz_guid]);
+       $postage=0;
+       if( !empty($$goods)){
+          
+           if($type=='express_postage'){
+               $postage= $goods->express_postage;
+           }else{
+               $postage=$goods->postage;
+           }
+           $order->amount = $order->amount - $order->postage + $postage;
+           $order->postage = $postage;
+           
+       }
+       $order->save();
+       
+       
+       $jsApiParameters='';
+       if($order->is_pay==0 && $order->amount>0){
+           //初始化日志
+           $logHandler= new \CLogFileHandler("../runtime/logs/".date('Y-m-d').'.log');
+           $log = \Log::Init($logHandler, 15);
+           //①、获取用户openid
+           $tools = new \JsApiPay();
+           //            $openId = $tools->GetOpenid(yii::$app->request->absoluteUrl);
+           $openId=$user->openid;
+           //②、统一下单
+           $input = new \WxPayUnifiedOrder();
+           $input->SetBody($order->goods_name);
+           $input->SetAttach($order->order_guid);
+           $input->SetOut_trade_no($order->orderno);
+           // $input->SetTotal_fee($order->support_amount*100);
+           $input->SetTotal_fee($order->amount*100);
+           $input->SetTime_start(date("YmdHis"));
+           $input->SetTime_expire(date("YmdHis", time() + 600));
+           $input->SetGoods_tag(yii::$app->user->identity->nick);
+           $input->SetNotify_url(yii::$app->params['paynotify']);
+           $input->SetTrade_type("JSAPI");
+           $input->SetOpenid($openId);
+           $wxorder = \WxPayApi::unifiedOrder($input);
+           
+           $jsApiParameters = $tools->GetJsApiParameters($wxorder);
+       }
+       $res=[
+           'postage'=>$postage,
+           'jsApiParameters'=>$jsApiParameters
+       ];
+       return $jsApiParameters;
+       
+   }
+   
    public function actionPayDo(){
        $order_guid=$_GET['order_guid'];
        $order=Order::findOne(['order_guid'=>$order_guid]);
@@ -460,27 +516,27 @@ class SiteController extends Controller
     
     }
 
-//       public function actionLogin()
-//     {
-//      $model=new LoginForm();
+      public function actionLogin()
+    {
+     $model=new LoginForm();
     
-//      if($model->load(Yii::$app->request->post())&&$model->login()){
-//          return $this->goBack();
-//      }
+     if($model->load(Yii::$app->request->post())&&$model->login()){
+         return $this->goBack();
+     }
          
-//      return $this->render('login',['model'=>$model]);
-//     }   
+     return $this->render('login',['model'=>$model]);
+    }   
     
     /**
      * 认证服务号登录,网页授权登录
      * @return \yii\web\Response
      */
-     public function actionLogin()
-    {
-        $appid=yii::$app->params['appid'];
-        $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
-        return $this->redirect($url);
-    }  
+//      public function actionLogin()
+//     {
+//         $appid=yii::$app->params['appid'];
+//         $url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=http://wechat.1paibao.net/site/login-do&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+//         return $this->redirect($url);
+//     }  
     
     /**
      * 认证服务号登录处理

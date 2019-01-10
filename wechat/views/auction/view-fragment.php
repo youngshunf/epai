@@ -31,6 +31,9 @@ $leftTime=intval( $model->end_time - time());
     $now=time();
     if($now>=$model->start_time&&$now<=$model->end_time){?>
        <p>当前价格:<span class="red">￥<?= $model->current_price?></span>
+       <?php if(!empty($agentBid)&&$agentBid->user_guid==yii::$app->user->identity->user_guid){?>
+       <p>您当前最高代理价:<span class="red">￥<?= $agentBid->top_price?></span>
+       <?php }?>
          <?php if($model->reverse_price!=0.00){?>
                  <img alt="保留价" src="../img/baoliujia.png" style="width:24px;display: inline-block">
                  <?php }?>
@@ -79,7 +82,8 @@ $leftTime=intval( $model->end_time - time());
                   <?php if(yii::$app->user->identity->status==0){?>
 					<span class="red">您已被禁止参与拍卖,请及时购买已经成交的拍品.</span>
 					<?php }else{?>
-					<a  class="btn btn-lg btn-danger  bid-btn" >出价</a>
+					<button  class="btn  btn-danger  bid-btn"  >出价</button>
+					<button  class="btn  btn-success  agent-bid-btn" >代理出价</button>
 					<?php if($model->current_price<$model->reverse_price){?>
 					<p class="organe">该拍品有保留价</p>
 					<?php }?>
@@ -213,6 +217,12 @@ $leftTime=intval( $model->end_time - time());
             ['attribute'=> '竞拍人',
             'format' => 'html',
             'value'=>function ($model){
+                if(yii::$app->user->identity->user_guid==$model->user->user_guid){
+                    return '您本人';
+                }
+                if(!empty($model->rand_name)){
+                    return $model->rand_name;
+                }
                return empty($model->user->name)?CommonUtil::truncateMobile($model->user->mobile):$model->user->name;
             }],
              ['attribute'=> '价格',

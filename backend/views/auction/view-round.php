@@ -39,6 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'desc',
             'source',
             'seller_fee',
+            'number',
+            'interval',
             ['attribute'=>'start_time','value'=>CommonUtil::fomatTime($model->start_time)],
             ['attribute'=>'end_time','value'=>CommonUtil::fomatTime($model->end_time)],
            ['attribute'=>'创建时间','value'=>CommonUtil::fomatTime($model->created_at)],

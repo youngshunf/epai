@@ -36,9 +36,10 @@ class AuctionRound extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['start_time', 'end_time', 'name', 'desc'], 'required'],
+            [['start_time', 'end_time', 'name'], 'required'],
             [['desc'], 'string'],
-            [['created_at', 'updated_at','sort','seller_fee'], 'integer'],
+            [['created_at', 'updated_at','sort','seller_fee','number','interval'], 'integer'],
+            [['postage', 'express_postage'], 'number'],
             [['user_guid', 'path', 'photo'], 'string', 'max' => 64],
             [['name', 'source'], 'string', 'max' => 255]
         ];
@@ -63,6 +64,10 @@ class AuctionRound extends \yii\db\ActiveRecord
             'seller_fee'=>'买家佣金(%)',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'number'=>'拍品数量',
+            'postage'=>'其他邮费',
+            'express_postage'=>'顺丰邮费',
+            'interval'=>'时间间隔(秒)'
         ];
     }
     public function getUser(){

@@ -41,7 +41,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['type', 'is_pay', 'pay_time', 'created_at', 'updated_at','status'], 'integer'],
-            [['amount'], 'number'],
+            [['amount','postage'], 'number'],
             [['user_guid', 'order_guid', 'orderno', 'biz_guid'], 'string', 'max' => 48]
         ];
     }
@@ -74,6 +74,7 @@ class Order extends \yii\db\ActiveRecord
             'created_at' => '时间',
             'updated_at' => '更新时间',
             'address'=>'收货地址',
+            'postage'=>'邮费'
         ];
     }
     

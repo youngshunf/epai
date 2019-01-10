@@ -13,14 +13,16 @@ use kartik\widgets\DateTimePicker;
 $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
 ?>
 
-<div class="news-form">
+<div class="news-form row">
 
     <?php $form = ActiveForm::begin(['id'=>'round-form','options' => ['enctype' => 'multipart/form-data','onsubmit'=>'return check()']]); ?>
   
     <?= $form->field($model, 'name')->textInput(['maxlength' => 255]) ?>
-     <?= $form->field($model, 'seller_fee')->textInput(['maxlength' => 255]) ?>
+     <?= $form->field($model, 'seller_fee')->textInput(['maxlength' => 255,'type'=>'number']) ?>
      <?= $form->field($model, 'source')->textInput(['maxlength' => 255])->label('提供方(非必填)') ?>
      <?= $form->field($model, 'sort')->textInput(['maxlength' => 10])->label('排序(越大越靠前)') ?>
+     <div class="col-md-6">
+   
       <?= $form->field($model, 'start_time')->widget(DateTimePicker::className(),[
         'options' => ['placeholder' => '请选择时间'],
         'pluginOptions' => [
@@ -35,6 +37,13 @@ $this->registerJsFile('@web/js/lrz.bundle.js', ['position'=> View::POS_HEAD]);
             'format' => 'yyyy-mm-dd h:i'
         ]
     ]); ?>
+      <?= $form->field($model, 'express_postage')->textInput(['maxlength' => 255,'type'=>'number']) ?>
+      </div>
+       <div class="col-md-6">
+          <?= $form->field($model, 'number')->textInput(['maxlength' => 255,'type'=>'number']) ?>
+             <?= $form->field($model, 'interval')->textInput(['maxlength' => 255,'type'=>'number']) ?>
+             <?= $form->field($model, 'postage')->textInput(['maxlength' => 255,'type'=>'number']) ?>
+       </div>
      <?= $form->field($model, 'desc')->textarea(['rows'=>'6'])?>
      <div class="form-group">
         <label class="control-label"> 封面图片</label>

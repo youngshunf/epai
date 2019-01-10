@@ -33,6 +33,7 @@ if(empty($order->coupon_code)){
                  <?php if($order->seller_fee>0){?>
                   <p><label>买家佣金:</label><span class="red"> + ￥<?= $order->seller_fee?></span></p>
                  <?php }?>
+                 
                  <?php if(!empty($order->coupon_code)){?>
                   <p><label>优惠金额:</label><span class="red"> - ￥<?= $order->discount_amount?></span></p>
                  <?php }?>
@@ -49,6 +50,23 @@ if(empty($order->coupon_code)){
 					</li>
                    <?php }?>
                  </ul>
+                 <?php }?>
+                 <?php if($order->postage>0 && $order->express_postage>0){?>
+                  <p><label>请选择邮费:</label></p>
+                 <ul class="mui-table-view">
+                 
+                   <li class="mui-table-view-cell mui-radio mui-left postage" data-type="<?=$model->express_postage?>" >
+						<input name="postage" type="radio" value="<?= $model->express_postage?>" data-type="express_postage"   checked><span class="red">￥ <?= $v->express_postage?> </span>  <span class="sub-txt">顺丰邮费</span>
+					</li>
+					<li class="mui-table-view-cell mui-radio mui-left postage" data-type="<?=$model->postage?>" >
+						<input name="postage" type="radio" value="<?= $model->postage?>" data-type="postage"   ><span class="red">￥ <?= $v->postage?> </span>  <span class="sub-txt">普通邮费</span>
+					</li>
+                 
+                 </ul>
+                 <?php }elseif ($order->postage>0){?>
+                 <p><label>普通邮费:</label><span class="red"> + ￥<?= $order->postage?></span></p>
+                 <?php }elseif ($order->express_postage>0){?>
+                 <p><label>顺丰邮费:</label><span class="red"> + ￥<?= $order->express_postage?></span></p>
                  <?php }?>
                  <p><label>实际支付金额:</label><span class="red" id="final-amount">￥<?= $order->amount?></span></p>
                 
@@ -151,10 +169,18 @@ $("input[name=coupon]").change(function(){
 		finalAmount=0;
 	}
 	$('#final-amount').html('￥'+finalAmount);
-	
-	
 });
-
+var lastPostage=parseInt("<?= $order->postage?>");
+$("input[name=postage]").change(function(){
+	 var postage=parseInt($("input[name=postage]:checked").val());
+	 var type=$("input[name=postage]:checked").data('type');
+	 updateOrderWidthPostage(type);
+	 var finalAmount=amount-lastPostage+postage;
+		if(finalAmount<0){
+			finalAmount=0;
+		}
+		$('#final-amount').html('￥'+finalAmount);
+});
 
 var hasAddress=<?= $hasAddress?>;
 
@@ -235,6 +261,26 @@ function callpay()
 	}
 	
 	
+}
+
+function updateOrderWidthPostage(type){
+	$.ajax({
+      url:'update-order-with-postage',
+      method:'post',
+      data:{
+		orderid:orderid,
+		type:type,
+      },
+      dataType:'json',
+      success:function(rs){
+    	  jsApiParameters=rs.jsApiParameters;
+    	  lastPostage=rs.postage;
+      },
+      error:function(e){
+			mui.alert('发生错误,请稍候再试');
+      }
+ 
+	})
 }
 
 function updateOrder(){

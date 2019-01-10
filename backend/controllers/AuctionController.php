@@ -107,6 +107,7 @@ class AuctionController extends Controller
     }
     
     public function SendMessage($id,$type){
+        
         $res=0;
         foreach (User::find()->each(100) as $user){
             if(CommonUtil::SendOnlineMessage($user->user_guid, $id,$type)){
@@ -292,8 +293,26 @@ class AuctionController extends Controller
                 $model->status=2;
             }
             $model->created_at=time();
-            if($model->save())
+            if($model->save()){
+                if($model->number>0&&$model->interval>0){
+                    for($i=1;$i<=$model->number;$i++){
+                        $goods=new AuctionGoods();
+                        $goods->user_guid=yii::$app->user->identity->user_guid;
+                        $goods->goods_guid=CommonUtil::createUuid();
+                        $goods->start_time=$model->start_time;
+                        $goods->postage=$model->postage;
+                        $goods->express_postage=$model->express_postage;
+                        $goods->roundid=$model->id;
+                        $goods->sort=$i;
+                        $goods->end_time=$model->end_time+($i*$model->interval);
+                        $goods->name="【拍卖# $i 】";
+                        $goods->created_at=time();
+                        $goods->save();
+                    }
+                }
                 return $this->redirect(['view-round', 'id' => $model->id]);
+            }
+                
         } else {
             return $this->render('create-round', [
                 'model' => $model,
