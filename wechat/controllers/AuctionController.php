@@ -613,6 +613,7 @@ class AuctionController extends Controller
         $goods_guid=$_POST['goods-guid'];
         $price=$_POST['bid-price'];
         $auctionGoods=AuctionGoods::findOne(['goods_guid'=>$goods_guid]);
+        $lastPrice=$auctionGoods->current_price;
         $lastLeadingUser=$auctionGoods->leading_user;
         $auctionTimes=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->count();
         $now=time();
@@ -708,8 +709,8 @@ class AuctionController extends Controller
                 $msg .="<br>小火估价 ￥".$auctionGoods->eval_price;
             }
             yii::$app->getSession()->setFlash('success',$msg);
-        }elseif($auctionGoods->current_price>$auctionGoods->reverse_price && $auctionGoods->reverse_price !=0.00){
-            yii::$app->getSession()->setFlash('success',"出价成功，您已超过保留价!");
+        }elseif($auctionGoods->current_price>=$auctionGoods->reverse_price && $auctionGoods->reverse_price !=0.00 && $lastPrice < $auctionGoods->reverse_price){
+            yii::$app->getSession()->setFlash('success',"恭喜您刚刚超过保留价，出价成功!");
         }else{
             yii::$app->getSession()->setFlash('success',"出价成功!");
         }
