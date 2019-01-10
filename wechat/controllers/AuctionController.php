@@ -709,7 +709,7 @@ class AuctionController extends Controller
             }
             yii::$app->getSession()->setFlash('success',$msg);
         }elseif($auctionGoods->current_price>$auctionGoods->reverse_price && $auctionGoods->reverse_price !=0.00){
-            yii::$app->getSession()->setFlash('success',"出价成功!");
+            yii::$app->getSession()->setFlash('success',"出价成功，您已超过保留价!");
         }else{
             yii::$app->getSession()->setFlash('success',"出价成功!");
         }

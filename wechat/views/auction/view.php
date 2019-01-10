@@ -32,7 +32,7 @@ $this->registerJsFile('@web/js/PCASClass.js',['position'=> View::POS_HEAD]);
    if($model->current_price<$model->reverse_price){?>
 		<p class="organe center">未达到保留价</p>
 	<?php }else{?>
-		<p class="organe center">拍品已达到保留价</p>
+<!-- 		<p class="organe center">拍品已达到保留价</p> -->
 	<?php }}?>
 
     <?php 
