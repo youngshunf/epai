@@ -20,8 +20,8 @@ $leftTime=intval( $model->end_time - time());
   <div class="<?php if(  $leftTime>=0 && $leftTime <=60 ) echo 'auction-alert'?>">
     <h5><?=$model->name ?>  </h5>
  	 <?php
- if($model->reverse_price!=0.00){
-   if($model->current_price<$model->reverse_price){?>
+ if($model->reverse_price>0){
+     if( $model->reverse_price >$model->current_price){?>
 		<p class="organe center">未达到保留价</p>
 	<?php }else{?>
 <!-- 		<p class="organe center">拍品已达到保留价</p> -->

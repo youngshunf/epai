@@ -906,6 +906,72 @@ class AuctionController extends Controller
             yii::$app->getSession()->setFlash('error',"代理出价失败,您已经设置了一个比当前更高的代理价，此次代理出价无效，请修改代理价金额!");
             return $this->redirect(yii::$app->request->referrer);
         }
+        
+        if($auctionGoods->reverse_price>0 && $auctionGoods->reverse_price>=$top_price){
+            //开始事务
+            $transaction=yii::$app->db->beginTransaction();
+            try{
+                $maxPrice=AuctionBidRec::find()->andWhere(['goods_guid'=>$goods_guid])->max('price');
+                if($top_price<$maxPrice){
+                    throw new Exception("您的出价不是最高的");
+                    yii::$app->getSession()->setFlash('error',"您的出价已被超越,出价无效,请重新出价!");
+                    return $this->redirect(yii::$app->request->referrer);
+                }
+                $price=$top_price;
+                AuctionBidRec::updateAll(['is_leading'=>0],['goods_guid'=>$goods_guid]);
+                $randName=rand(1000,9999);
+                $rec=AuctionBidRec::findOne(['goods_guid'=>$goods_guid,'user_guid'=>$user_guid]);
+                if(!empty($rec) && !empty($rec->rand_name)){
+                    $randName=$rec->rand_name;
+                }
+                //增加出价记录
+                $bidRec=new AuctionBidRec();
+                $bidRec->goods_guid=$goods_guid;
+                $bidRec->user_guid=$user_guid;
+                $bidRec->price=$price;
+                $bidRec->is_leading=1;
+                $bidRec->rand_name=$randName;
+                $bidRec->created_at=time();
+                if(!$bidRec->save()) throw new Exception(" insert db auction_bid_rec error");
+                
+                //更新拍品表
+                $auctionGoods->count_auction+=1;
+                $auctionGoods->current_price=$price;
+                $leading_user=$auctionGoods->leading_user;
+                $auctionGoods->leading_user=$user_guid;
+                if($auctionGoods->end_time - time() <=60){
+                    $auctionGoods->end_time +=90;
+                    $round=AuctionRound::findOne($auctionGoods->roundid);
+                    if(!empty($round)){
+                        if($round->end_time<$auctionGoods->end_time){
+                            $round->end_time=$auctionGoods->end_time;
+                            $round->status=1;
+                            $round->save();
+                        }
+                    }
+                }
+                $auctionGoods->updated_at=time();
+                if(!$auctionGoods->save()) throw new Exception(" insert db auction_goods error");
+                
+                $transaction->commit();
+                if($user_guid != $leading_user){
+                    $this->SendTemplateMessage($leading_user, $auctionGoods->id);
+                }
+            }catch (Exception $e){
+                $transaction->rollBack();
+                yii::$app->getSession()->setFlash('error',"出价失败,请稍候重试!");
+                return $this->redirect(['view','id'=>$auctionGoods->id]);
+            }
+            if($auctionGoods->reverse_price==$top_price){
+                yii::$app->getSession()->setFlash('success',"恭喜您刚刚超过保留价，代理出价成功!");
+            }else{
+                yii::$app->getSession()->setFlash('success',"代理出价成功，您还未达到保留价!");
+            }
+            
+            return $this->redirect(['view','id'=>$auctionGoods->id]);
+        }
+        
+        
         //自己已有的代理出价失效
         AuctionAgentBid::updateAll(['is_valid'=>0],['user_guid'=>$user_guid,'goods_guid'=>$goods_guid]);
         
